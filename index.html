@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tarot Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#FAF6EE;
+  --ivory:#FFFDF8;
+  --sage:#8A9B7E;
+  --sage-soft:#EEF1E9;
+  --terracotta:#C06B4A;
+  --terracotta-soft:#F6E9E2;
+  --navy:#2E3D51;
+  --navy-deep:#22303F;
+  --gold:#C9A227;
+  --gold-soft:#F3ECD8;
+  --ink:#33322E;
+  --ink-soft:#6B685F;
+  --line:#E5DFD2;
+  --radius:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--cream);
+  color:var(--ink);
+  line-height:1.55;
+  min-height:100vh;
+}
+h1,h2,h3,.serif{font-family:'Fraunces',serif;font-weight:600;color:var(--navy)}
+header{
+  background:var(--navy);
+  color:var(--cream);
+  padding:20px 20px 0;
+}
+.wordmark{display:flex;align-items:baseline;gap:10px;max-width:960px;margin:0 auto}
+.wordmark h1{color:var(--cream);font-size:1.5rem;font-weight:600;letter-spacing:.01em}
+.wordmark .star{color:var(--gold);font-size:1.1rem}
+.wordmark .tag{color:#B9C3CE;font-size:.78rem}
+nav{max-width:960px;margin:14px auto 0;display:flex;gap:4px;overflow-x:auto}
+nav button{
+  font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:500;
+  background:transparent;color:#C5CDD6;border:none;cursor:pointer;
+  padding:10px 16px;border-radius:10px 10px 0 0;white-space:nowrap;
+}
+nav button[aria-selected="true"]{background:var(--cream);color:var(--navy);font-weight:700}
+nav button:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+main{max-width:960px;margin:0 auto;padding:24px 20px 80px}
+.view{display:none}
+.view.active{display:block}
+.panel{
+  background:var(--ivory);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin-bottom:18px;
+}
+.eyebrow{
+  font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--terracotta);margin-bottom:6px;
+}
+h2{font-size:1.35rem;margin-bottom:8px}
+h3{font-size:1.05rem;margin-bottom:6px}
+p.lede{color:var(--ink-soft);margin-bottom:14px}
+button.primary,button.secondary,button.ghost{
+  font-family:'DM Sans',sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;
+  border-radius:10px;padding:11px 20px;border:none;
+}
+button.primary{background:var(--navy);color:var(--cream)}
+button.primary:hover{background:var(--navy-deep)}
+button.secondary{background:var(--terracotta);color:#fff}
+button.ghost{background:transparent;color:var(--navy);border:1.5px solid var(--line)}
+button.ghost:hover{border-color:var(--navy)}
+button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+label{display:block;font-size:.82rem;font-weight:700;color:var(--navy);margin:12px 0 4px}
+textarea,input[type=text],select{
+  width:100%;font-family:'DM Sans',sans-serif;font-size:.95rem;color:var(--ink);
+  background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;
+}
+textarea:focus,input:focus,select:focus{outline:none;border-color:var(--sage)}
+textarea{min-height:70px;resize:vertical}
+.chip-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.chip{
+  font-size:.8rem;font-weight:500;padding:6px 12px;border-radius:999px;cursor:pointer;
+  background:var(--sage-soft);color:var(--navy);border:1.5px solid transparent;
+}
+.chip.on{background:var(--sage);color:#fff}
+.spread-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:12px}
+.spread-card{
+  background:#fff;border:1.5px solid var(--line);border-radius:var(--radius);
+  padding:14px;cursor:pointer;text-align:left;font-family:'DM Sans',sans-serif;
+}
+.spread-card:hover{border-color:var(--sage)}
+.spread-card.on{border-color:var(--terracotta);background:var(--terracotta-soft)}
+.spread-card .n{font-family:'Fraunces',serif;font-weight:600;color:var(--navy);font-size:.98rem}
+.spread-card .c{font-size:.76rem;color:var(--ink-soft);margin-top:4px}
+.mode-row{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap}
+.mode-btn{flex:1;min-width:160px;text-align:left;padding:14px;border-radius:var(--radius);
+  border:1.5px solid var(--line);background:#fff;cursor:pointer;font-family:'DM Sans',sans-serif}
+.mode-btn.on{border-color:var(--terracotta);background:var(--terracotta-soft)}
+.mode-btn .n{font-weight:700;color:var(--navy)}
+.mode-btn .c{font-size:.78rem;color:var(--ink-soft)}
+.toggle-row{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:.9rem}
+.toggle-row input{width:auto}
+/* the reading table */
+.table-felt{
+  background:linear-gradient(160deg,var(--navy) 0%,var(--navy-deep) 100%);
+  border-radius:var(--radius);padding:24px 16px;margin-top:14px;
+}
+.positions{display:flex;flex-wrap:wrap;gap:16px;justify-content:center}
+.pos{width:110px;text-align:center}
+.pos .pname{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;min-height:2.1em}
+.card-slot{width:100px;height:160px;margin:0 auto;perspective:800px;cursor:pointer}
+.card-inner{position:relative;width:100%;height:100%;transition:transform .6s;transform-style:preserve-3d}
+.card-slot.flipped .card-inner{transform:rotateY(180deg)}
+@media (prefers-reduced-motion:reduce){.card-inner{transition:none}}
+.card-face{
+  position:absolute;inset:0;backface-visibility:hidden;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;padding:8px;
+}
+.card-back{
+  background:var(--navy-deep);border:2px solid var(--gold);color:var(--gold);
+  font-size:1.6rem;
+}
+.card-front{
+  background:var(--ivory);border:2px solid var(--gold);transform:rotateY(180deg);
+  flex-direction:column;gap:4px;text-align:center;
+}
+.card-front .cn{font-family:'Fraunces',serif;font-weight:600;font-size:.8rem;color:var(--navy);line-height:1.2}
+.card-front .rev{font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--terracotta)}
+.card-front.reversed{transform:rotateY(180deg) rotate(180deg)}
+.pos .picker{margin-top:6px}
+.pos select{font-size:.72rem;padding:6px}
+.pos .revlab{font-size:.68rem;color:var(--cream);display:flex;align-items:center;gap:4px;justify-content:center;margin-top:4px}
+/* interpretation */
+.interp{margin-top:16px}
+.interp-card{background:#fff;border:1.5px solid var(--line);border-left:4px solid var(--sage);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px}
+.interp-card.rev{border-left-color:var(--terracotta)}
+.interp-card .pos-label{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+.interp-card .cname{font-family:'Fraunces',serif;font-weight:600;font-size:1.05rem;color:var(--navy)}
+.interp-card .kw{font-size:.8rem;font-weight:700;color:var(--sage);margin:2px 0 4px}
+.interp-card.rev .kw{color:var(--terracotta)}
+.interp-card .meaning{font-size:.9rem}
+.interp-card .poscontext{font-size:.82rem;color:var(--ink-soft);margin-top:6px;font-style:italic}
+.synth{background:var(--gold-soft);border:1.5px solid var(--gold);border-radius:var(--radius);padding:16px;margin-top:6px}
+.synth h3{color:var(--navy)}
+.synth p{font-size:.9rem;margin-top:6px}
+/* journal */
+.journal-entry{background:#fff;border:1.5px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;cursor:pointer}
+.journal-entry:hover{border-color:var(--sage)}
+.journal-entry .d{font-size:.74rem;font-weight:700;color:var(--terracotta);letter-spacing:.06em;text-transform:uppercase}
+.journal-entry .q{font-family:'Fraunces',serif;font-weight:600;color:var(--navy);margin:2px 0}
+.journal-entry .meta{font-size:.78rem;color:var(--ink-soft)}
+.tagpill{display:inline-block;font-size:.7rem;font-weight:700;background:var(--sage-soft);color:var(--navy);border-radius:999px;padding:2px 9px;margin:6px 4px 0 0}
+.detail-cards{font-size:.88rem;margin:8px 0}
+.detail-cards li{margin-left:18px;margin-bottom:2px}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:.85rem}
+.bar-row .bl{width:90px;font-weight:700;color:var(--navy);flex-shrink:0}
+.bar-track{flex:1;background:var(--sage-soft);border-radius:999px;height:14px;overflow:hidden}
+.bar-fill{height:100%;border-radius:999px;background:var(--sage)}
+.bar-row .bv{width:26px;text-align:right;color:var(--ink-soft)}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin:12px 0}
+.stat{background:#fff;border:1.5px solid var(--line);border-radius:var(--radius);padding:14px;text-align:center}
+.stat .v{font-family:'Fraunces',serif;font-weight:700;font-size:1.6rem;color:var(--terracotta)}
+.stat .l{font-size:.74rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
+.empty{color:var(--ink-soft);font-size:.9rem;font-style:italic;padding:8px 0}
+.btn-row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.note{font-size:.78rem;color:var(--ink-soft);margin-top:10px}
+.hidden{display:none!important}
+footer{max-width:960px;margin:0 auto;padding:0 20px 30px;font-size:.74rem;color:var(--ink-soft)}
+@media(max-width:520px){.pos{width:96px}.card-slot{width:88px;height:142px}}
+/* study mode */
+.study-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:12px}
+.study-item{
+  font-family:'Fraunces',serif;font-weight:500;font-size:.88rem;color:var(--navy);
+  background:#fff;border:1.5px solid var(--line);border-radius:10px;
+  padding:10px 12px;cursor:pointer;text-align:left;
+}
+.study-item:hover{border-color:var(--gold);background:var(--gold-soft)}
+.study-section{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.study-section h3{display:flex;align-items:center;gap:8px}
+.study-section h3::before{content:"✶";color:var(--gold);font-size:.8rem}
+.study-section p{font-size:.92rem;margin-top:6px}
+.corr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:10px}
+.corr{background:var(--sage-soft);border-radius:10px;padding:10px 12px}
+.corr .cl{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+.corr .cv{font-family:'Fraunces',serif;font-weight:600;color:var(--navy);font-size:.95rem}
+.prompt-list li{margin-left:18px;font-size:.92rem;margin-bottom:6px}
+.study-appearance{background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:10px 14px;margin-top:8px;font-size:.86rem;cursor:pointer}
+.study-appearance:hover{border-color:var(--sage)}
+.study-appearance .sd{font-size:.7rem;font-weight:700;color:var(--terracotta);text-transform:uppercase;letter-spacing:.06em}
+/* card images */
+.card-front{overflow:hidden;position:relative}
+.card-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:6px;z-index:1}
+.card-front .imgcap{position:absolute;left:0;right:0;bottom:0;z-index:2;background:rgba(34,48,63,.82);color:var(--cream);font-size:.6rem;font-weight:700;padding:3px 4px;letter-spacing:.03em}
+.study-img{display:block;max-height:280px;max-width:180px;border-radius:8px;border:2px solid var(--gold);margin:12px auto 0}
+.daily-img{float:right;max-height:150px;border-radius:6px;border:2px solid var(--gold);margin:0 0 8px 12px}
+.daily-img.reversed,.study-img.reversed{transform:rotate(180deg)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wordmark">
+    <span class="star">✶</span>
+    <h1>Tarot Atlas</h1>
+    <span class="tag">reference library · reading table · journal</span>
+  </div>
+  <nav role="tablist">
+    <button role="tab" aria-selected="true" data-view="sanctuary">Sanctuary</button>
+    <button role="tab" aria-selected="false" data-view="reading">Reading Table</button>
+    <button role="tab" aria-selected="false" data-view="journal">Journal</button>
+    <button role="tab" aria-selected="false" data-view="patterns">Patterns</button>
+    <button role="tab" aria-selected="false" data-view="study">Study</button>
+  </nav>
+</header>
+
+<main>
+
+<!-- ═══════════ SANCTUARY ═══════════ -->
+<section id="view-sanctuary" class="view active">
+  <div class="panel">
+    <div class="eyebrow">Welcome back</div>
+    <h2 id="sanct-greeting">The table is set.</h2>
+    <p class="lede" id="sanct-sub">Draw a single card for the day, or begin a full reading.</p>
+    <div class="btn-row">
+      <button class="secondary" id="btn-daily">Draw a daily card</button>
+      <button class="primary" id="btn-new-reading">Begin a reading</button>
+    </div>
+    <div id="daily-result" class="interp hidden"></div>
+  </div>
+  <div class="panel" id="sanct-recent">
+    <div class="eyebrow">Recent readings</div>
+    <div id="sanct-recent-list"></div>
+  </div>
+</section>
+
+<!-- ═══════════ READING TABLE ═══════════ -->
+<section id="view-reading" class="view">
+
+  <div class="panel" id="step-intention">
+    <div class="eyebrow">Step 1 · Intention</div>
+    <h2>What are you bringing to the table?</h2>
+    <label for="intention">Question or situation</label>
+    <textarea id="intention" placeholder="What do I need to understand about…"></textarea>
+    <label>Mood right now</label>
+    <div class="chip-row" id="mood-chips"></div>
+    <label for="tags">Tags (comma-separated)</label>
+    <input type="text" id="tags" placeholder="house, work, family…">
+  </div>
+
+  <div class="panel" id="step-spread">
+    <div class="eyebrow">Step 2 · Spread</div>
+    <h2>Choose a spread</h2>
+    <div class="spread-grid" id="spread-grid"></div>
+  </div>
+
+  <div class="panel" id="step-mode">
+    <div class="eyebrow">Step 3 · How the cards arrive</div>
+    <h2>Physical deck or digital draw?</h2>
+    <div class="mode-row">
+      <button class="mode-btn on" data-mode="digital">
+        <div class="n">Digital draw</div>
+        <div class="c">The Atlas shuffles and deals. Tap each card to reveal.</div>
+      </button>
+      <button class="mode-btn" data-mode="physical">
+        <div class="n">Physical deck</div>
+        <div class="c">Shuffle and deal your real cards, then enter each one.</div>
+      </button>
+    </div>
+    <div class="toggle-row">
+      <input type="checkbox" id="reversals" checked>
+      <label for="reversals" style="margin:0">Allow reversals</label>
+    </div>
+    <div class="btn-row">
+      <button class="secondary" id="btn-deal">Deal the cards</button>
+    </div>
+  </div>
+
+  <div class="panel hidden" id="step-table">
+    <div class="eyebrow">Step 4 · The table</div>
+    <h2 id="table-title"></h2>
+    <div class="table-felt"><div class="positions" id="positions"></div></div>
+    <div class="btn-row">
+      <button class="primary hidden" id="btn-interpret">Interpret the reading</button>
+    </div>
+  </div>
+
+  <div class="panel hidden" id="step-interp">
+    <div class="eyebrow">Step 5 · Interpretation</div>
+    <h2>What the cards are saying</h2>
+    <p class="lede">These are starting points for reflection, not fixed outcomes.</p>
+    <div class="interp" id="interp-cards"></div>
+    <div class="synth" id="interp-synth"></div>
+    <label for="reflection">First reflection — what resonates? What doesn't?</label>
+    <textarea id="reflection"></textarea>
+    <div class="btn-row">
+      <button class="secondary" id="btn-save-reading">Save to journal</button>
+      <button class="ghost" id="btn-discard">Discard</button>
+    </div>
+  </div>
+
+</section>
+
+<!-- ═══════════ JOURNAL ═══════════ -->
+<section id="view-journal" class="view">
+  <div class="panel">
+    <div class="eyebrow">Reading journal</div>
+    <h2>Every reading, kept</h2>
+    <label for="journal-search">Search readings, cards, tags</label>
+    <input type="text" id="journal-search" placeholder="Empress, house, work…">
+    <div class="btn-row">
+      <button class="ghost" id="btn-export">Export journal (JSON)</button>
+      <button class="ghost" id="btn-import">Import journal</button>
+      <input type="file" id="import-file" accept=".json" class="hidden">
+    </div>
+    <p class="note">Your journal lives in this browser. Export a copy now and then as a backup.</p>
+  </div>
+  <div id="journal-list"></div>
+  <div class="panel hidden" id="journal-detail"></div>
+</section>
+
+<!-- ═══════════ PATTERNS ═══════════ -->
+<section id="view-patterns" class="view">
+  <div class="panel">
+    <div class="eyebrow">Patterns</div>
+    <h2>What keeps showing up</h2>
+    <p class="lede">Patterns only emerge from a kept journal. The more readings you log, the more this page can tell you.</p>
+    <div class="stat-grid" id="pattern-stats"></div>
+    <h3>Most frequent cards</h3>
+    <div id="pattern-cards"></div>
+    <h3 style="margin-top:18px">Suit balance across all readings</h3>
+    <div id="pattern-suits"></div>
+    <h3 style="margin-top:18px">Most-used tags</h3>
+    <div id="pattern-tags"></div>
+  </div>
+</section>
+
+<!-- ═══════════ STUDY ═══════════ -->
+<section id="view-study" class="view">
+  <div class="panel" id="study-browse">
+    <div class="eyebrow">Study Mode</div>
+    <h2>Teach me a card</h2>
+    <p class="lede">Symbolism, correspondences, tradition differences, and your own history with each card.</p>
+    <label for="study-search">Find a card</label>
+    <input type="text" id="study-search" placeholder="Strength, Queen of Pentacles…">
+    <div class="chip-row" id="study-suits"></div>
+    <div class="study-grid" id="study-grid"></div>
+  </div>
+  <div class="panel hidden" id="study-detail"></div>
+</section>
+
+</main>
+
+<footer>Rider–Waite–Smith system (public domain meanings). Readings are prompts for reflection, not predictions. · Tarot Atlas prototype</footer>
+
+<script>
+/* ═══════════════════ CARD DATABASE — RWS, 78 cards ═══════════════════ */
+/* [name, suit, upright keywords, upright meaning, reversed keywords, reversed meaning] */
+const DECK = [
+// ── Major Arcana ──
+["The Fool","major","beginnings, spontaneity, trust","A leap into the unknown; fresh energy and openness before the story has taken shape.","recklessness, hesitation, false starts","Enthusiasm without footing, or fear stalling a genuine new beginning."],
+["The Magician","major","will, skill, manifestation","You have the tools on the table; focused intention turns resources into results.","scattered energy, manipulation, untapped talent","Ability diffused across too many aims, or persuasion used without integrity."],
+["The High Priestess","major","intuition, mystery, inner knowing","The answer is already known beneath the surface; listen before acting.","secrets, disconnection from intuition","Ignoring the inner voice, or information deliberately withheld."],
+["The Empress","major","nurture, abundance, creation","Growth through care — of home, body, projects, and people; fertile ground.","creative block, smothering, depletion","Giving past your reserves, or growth stalled by neglect of the ground it needs."],
+["The Emperor","major","structure, authority, stability","Order and boundaries create the container in which things can thrive.","rigidity, control, absent leadership","Structure hardened into control, or a needed authority failing to show up."],
+["The Hierophant","major","tradition, guidance, institutions","Established systems, mentors, and conventions have something to teach here.","rebellion, questioning convention","The standard path doesn't fit; the rules deserve scrutiny."],
+["The Lovers","major","union, alignment, choice","A meaningful bond or a values-level choice; alignment between heart and action.","disharmony, misalignment, avoidance","Values and actions out of step, or a choice being dodged."],
+["The Chariot","major","determination, momentum, control","Competing forces harnessed toward one destination; willpower wins the day.","scattered drive, obstacles, loss of direction","Momentum without steering, or force applied where finesse is needed."],
+["Strength","major","courage, patience, gentle power","Influence through steadiness and compassion rather than force.","self-doubt, raw emotion, depleted courage","Inner reserves running low, or trying to muscle what needs gentleness."],
+["The Hermit","major","solitude, reflection, inner search","Withdraw to find the answer; wisdom comes from the quiet, not the crowd.","isolation, avoidance, loneliness","Retreat curdling into withdrawal, or refusing counsel you need."],
+["Wheel of Fortune","major","cycles, turning points, luck","The wheel is turning; circumstances shift and timing matters more than effort.","resistance to change, bad timing","Fighting a turning tide, or a cycle repeating because its lesson is unlearned."],
+["Justice","major","fairness, truth, accountability","Causes have effects; clarity, honesty, and balanced decisions are called for.","unfairness, avoidance of accountability","An imbalance unaddressed, or truth being bent to avoid consequences."],
+["The Hanged Man","major","pause, surrender, new perspective","Suspension is the point; the view changes when you stop struggling.","stalling, resistance, wasted sacrifice","A pause outliving its usefulness, or martyrdom without meaning."],
+["Death","major","endings, transformation, release","Something is genuinely over; clearing it makes room for what's next.","clinging, stagnation, delayed endings","Holding on past the end, prolonging a transition that wants to complete."],
+["Temperance","major","balance, moderation, blending","Patience and proportion; opposites mixed into something workable.","excess, imbalance, impatience","Overcorrection in one direction, or forcing a pace the situation won't hold."],
+["The Devil","major","attachment, restriction, shadow","Chains that are partly chosen — habits, contracts, dynamics that bind.","release, awareness, breaking free","Naming the attachment loosens it; the exit is closer than it looked."],
+["The Tower","major","upheaval, revelation, sudden change","A structure built on a flawed premise gives way; disruptive but clarifying.","averted disaster, delayed collapse, fear of change","The shake-up resisted or postponed; pressure building under the surface."],
+["The Star","major","hope, renewal, guidance","After the storm: healing, faith, and a longer horizon worth trusting.","discouragement, dimmed faith","Hope running thin; the guiding light obscured but not gone."],
+["The Moon","major","uncertainty, illusion, the subconscious","Things are not fully visible; feelings and fears distort the path.","clarity emerging, fears receding","Confusion beginning to lift; the imagined threat shrinking to size."],
+["The Sun","major","vitality, success, clarity","Warmth, confidence, and things working; a genuinely good stretch.","dimmed joy, delayed success","The good outcome is near but clouded — often by your own view of it."],
+["Judgement","major","reckoning, awakening, renewal","An honest accounting of the past that frees you to answer a new call.","self-doubt, avoidance of the call","Refusing the summons, or judging yourself harder than the record warrants."],
+["The World","major","completion, integration, arrival","A cycle genuinely finished; wholeness earned, a chapter closing well.","incompletion, loose ends","Almost there — something unfinished keeps the circle from closing."],
+// ── Wands ──
+["Ace of Wands","wands","spark, inspiration, new energy","A surge of creative or entrepreneurial fire; the idea wants to be acted on.","false start, delay, dimmed spark","The spark present but blocked; enthusiasm without a channel."],
+["Two of Wands","wands","planning, vision, first decision","The world in your hands and a map on the table; choosing a direction.","fear of the unknown, playing small","A vision shelved for the safe option."],
+["Three of Wands","wands","expansion, foresight, momentum","The ships are out; early efforts beginning to move and grow.","delays, obstacles, limited view","Progress slower than hoped; the horizon needs rechecking."],
+["Four of Wands","wands","celebration, home, milestone","A threshold worth marking — homecoming, stability, shared joy.","instability at home, postponed celebration","The foundation or the festivity not quite ready."],
+["Five of Wands","wands","friction, competition, testing","Energies clashing — often productive tension rather than real conflict.","avoidance of conflict, resolution","Tension suppressed or finally settling."],
+["Six of Wands","wands","victory, recognition, confidence","Success that others can see; earned acknowledgment.","private success, fall from favor, ego","A win unrecognized, or acclaim outrunning substance."],
+["Seven of Wands","wands","defense, conviction, standing ground","Holding your position against pressure; the high ground is yours to keep.","exhaustion, overwhelm, giving ground","Defending on too many fronts at once."],
+["Eight of Wands","wands","speed, movement, news","Things accelerating; messages, travel, rapid developments.","delays, frustration, misdirected haste","Momentum stalled or moving too fast to aim."],
+["Nine of Wands","wands","resilience, persistence, last push","Battered but standing; the final test before completion.","burnout, paranoia, defensiveness","Guarding so hard there's nothing left for the finish."],
+["Ten of Wands","wands","burden, responsibility, overload","Carrying everything at once; success that has become heavy.","release, delegation, collapse","Setting burdens down — by choice or because they drop."],
+["Page of Wands","wands","curiosity, exploration, fresh enthusiasm","A beginner's fire; eager news or a new passion project.","restlessness, half-formed ideas","Enthusiasm that hasn't found its form."],
+["Knight of Wands","wands","action, adventure, boldness","Charging toward the goal with charisma and speed.","impulsiveness, scattered energy, haste","Boldness without follow-through."],
+["Queen of Wands","wands","confidence, warmth, magnetism","Vibrant, self-assured energy that draws people in; courage worn lightly.","self-doubt, jealousy, demanding energy","Radiance dimmed by insecurity or spread too thin."],
+["King of Wands","wands","vision, leadership, bold direction","The entrepreneur's card — leading from vision and inspiring others to follow.","impulsive leadership, ego, ruthlessness","Vision without patience, or leadership serving the leader."],
+// ── Cups ──
+["Ace of Cups","cups","new feeling, love, emotional opening","The heart fills; a new relationship, connection, or creative flow begins.","blocked feelings, emptiness","Emotion held back or a cup that won't fill."],
+["Two of Cups","cups","partnership, mutual attraction, connection","Two meeting as equals; a bond forming in love, friendship, or work.","imbalance, disconnection, tension","A partnership out of sync."],
+["Three of Cups","cups","friendship, community, celebration","Shared joy; your people gathered around you.","overindulgence, exclusion, drifting apart","The circle strained or the party gone on too long."],
+["Four of Cups","cups","apathy, contemplation, missed offers","Withdrawn and unmoved; an opportunity sits unnoticed at hand.","re-engagement, new openness","Stirring from the funk; noticing what's offered."],
+["Five of Cups","cups","loss, grief, regret","Mourning what spilled while two cups still stand behind you.","acceptance, moving on, forgiveness","Grief beginning to turn toward what remains."],
+["Six of Cups","cups","nostalgia, memory, innocence","The past visiting sweetly — childhood, old friends, familiar comfort.","stuck in the past, rose-tinting","Memory holding you back from the present."],
+["Seven of Cups","cups","options, fantasy, wishful thinking","Many shimmering choices — some real, some illusion; discernment needed.","clarity, decision, overwhelm lifting","The fog clears; one cup gets chosen."],
+["Eight of Cups","cups","walking away, seeking more","Leaving something built because it no longer fulfills; a deeper search.","fear of leaving, aimless drifting","Knowing it's time to go and staying anyway."],
+["Nine of Cups","cups","contentment, satisfaction, wishes granted","The wish card; emotional and material comfort earned.","smugness, hollow satisfaction, greed","Getting the wish and finding it wasn't the want."],
+["Ten of Cups","cups","harmony, family, lasting happiness","The full picture — home, love, and belonging aligned.","family friction, broken harmony, misaligned values","The picture-perfect image hiding strain."],
+["Page of Cups","cups","emotional openness, creative message, wonder","A tender or imaginative beginning; unexpected feelings surfacing.","emotional immaturity, creative block","Feelings expressed sideways or bottled up."],
+["Knight of Cups","cups","romance, charm, following the heart","An offer or invitation led by feeling; the poet in motion.","moodiness, unrealistic promises","Charm without substance, or feeling swamping action."],
+["Queen of Cups","cups","compassion, empathy, emotional depth","Deep intuitive care — holding space for feeling without drowning in it.","emotional overwhelm, martyrdom, insecurity","Absorbing everyone's feelings until yours are lost."],
+["King of Cups","cups","emotional mastery, calm, diplomacy","Feeling deeply while steering steadily; compassion with composure.","repressed emotion, volatility, manipulation","Calm surface, storm below — or feeling weaponized."],
+// ── Swords ──
+["Ace of Swords","swords","clarity, breakthrough, truth","A cut through the fog; a new idea or hard truth that changes the frame.","confusion, misused intellect","Clarity clouded; the truth blunted or twisted."],
+["Two of Swords","swords","stalemate, difficult choice, avoidance","Blindfolded between two blades; a decision deferred.","decision, the blindfold off, information revealed","The impasse breaking — sometimes uncomfortably."],
+["Three of Swords","swords","heartbreak, painful truth, grief","A piercing sorrow — betrayal, loss, or words that wound.","healing, forgiveness, release of pain","The wound beginning to close."],
+["Four of Swords","swords","rest, recovery, retreat","Deliberate stillness; recuperation before the next engagement.","restlessness, burnout, forced rest","Refusing the rest until the body insists."],
+["Five of Swords","swords","conflict, hollow victory, discord","Winning at a cost; a battle that damaged more than it decided.","reconciliation, making amends, moving on","Laying down arms; counting the real cost."],
+["Six of Swords","swords","transition, moving on, passage","Leaving rough waters for calmer ones; a necessary crossing.","resistance to change, unfinished business","The boat delayed; baggage weighing the crossing."],
+["Seven of Swords","swords","strategy, stealth, deception","Cleverness or evasion — someone acting alone, not entirely openly.","confession, conscience, getting caught","The hidden move surfacing."],
+["Eight of Swords","swords","restriction, feeling trapped, self-imposed limits","Bound loosely and blindfolded — the trap is real but the exits exist.","release, new perspective, freedom","Seeing the bindings were negotiable all along."],
+["Nine of Swords","swords","anxiety, worry, sleepless nights","The 3 a.m. card; fears louder in the dark than the facts warrant.","recovery, perspective, fears easing","Daylight arriving; the worry shrinking to size."],
+["Ten of Swords","swords","painful ending, rock bottom, completion","A definitive, dramatic end — and dawn on the horizon behind it.","recovery, survival, refusing the end","Rising from the worst of it, or dragging out an ending."],
+["Page of Swords","swords","curiosity, vigilance, new ideas","A quick, questioning mind; news, research, watchfulness.","gossip, scattered thinking, haste","Words outrunning facts."],
+["Knight of Swords","swords","ambition, drive, charging ahead","Full speed toward the goal, argument, or cause; intellect in armor.","recklessness, aggression, burnout","Charging without checking the terrain."],
+["Queen of Swords","swords","clarity, independence, honest counsel","Sharp perception with a warm history behind it; truth kindly but plainly told.","coldness, bitterness, harsh judgment","The edge without the warmth."],
+["King of Swords","swords","intellect, authority, ethical judgment","Clear-headed authority; decisions from principle rather than feeling.","misuse of power, cold logic, manipulation","Judgment untethered from care."],
+// ── Pentacles ──
+["Ace of Pentacles","pentacles","opportunity, prosperity, new venture","A tangible seed — a job, offer, home, or investment ready to plant.","missed chance, shaky foundation","The seed present but the ground not ready."],
+["Two of Pentacles","pentacles","juggling, balance, adaptability","Keeping multiple demands in motion; flexible prioritizing.","overcommitment, dropped balls","Too many plates for the hands available."],
+["Three of Pentacles","pentacles","collaboration, craft, recognition of skill","Skilled work valued by others; building something together well.","misaligned team, sloppy work, lack of recognition","The collaboration or the craft not holding up."],
+["Four of Pentacles","pentacles","security, holding on, conservation","Protecting what's been built; stability with a tight grip.","scarcity mindset, release, overspending","The grip either loosening or strangling growth."],
+["Five of Pentacles","pentacles","hardship, scarcity, feeling left out","Lean times, material or emotional; help nearby but hard to see.","recovery, aid arriving, improvement","The cold spell ending; support accepted."],
+["Six of Pentacles","pentacles","generosity, exchange, support","Resources flowing where needed — giving, receiving, or both.","strings attached, imbalance, debt","Generosity with a ledger."],
+["Seven of Pentacles","pentacles","patience, assessment, long-term view","Pausing to evaluate what's grown; investment awaiting harvest.","impatience, poor returns, sunk cost","Effort and yield out of proportion."],
+["Eight of Pentacles","pentacles","mastery, diligence, apprenticeship","Head down, skill building; craft refined through repetition.","perfectionism, uninspired work, shortcuts","Effort without heart, or polish without purpose."],
+["Nine of Pentacles","pentacles","independence, self-sufficiency, earned comfort","The garden you built yourself; abundance enjoyed on your own terms.","overwork, hollow luxury, dependence","The comfort costing more than it gives."],
+["Ten of Pentacles","pentacles","legacy, family wealth, lasting foundations","The long game won — property, family, security across generations.","family disputes, unstable foundations","The legacy contested or the structure cracking."],
+["Page of Pentacles","pentacles","study, ambition, new skill","A practical beginning; learning with an eye to real results.","procrastination, lack of progress","The plan on paper, the work not started."],
+["Knight of Pentacles","pentacles","diligence, routine, reliability","Slow, steady, thorough — the most methodical knight; progress by persistence.","stagnation, boredom, perfectionism","Steady turned stuck."],
+["Queen of Pentacles","pentacles","nurture, practicality, resourceful care","Home, body, and finances tended with warmth; sustainable providing.","self-neglect, work-home imbalance","Caring for everything except yourself."],
+["King of Pentacles","pentacles","abundance, security, business mastery","The realized builder — enterprise, property, and provision handled with steadiness.","greed, materialism, stubbornness","Wealth guarded rather than grown, or worth measured only in assets."]
+];
+
+/* ═══════════════════ SPREADS ═══════════════════ */
+const SPREADS = [
+{id:"one",name:"One-Card Guidance",positions:[
+  ["Guidance","What most needs your attention right now."]]},
+{id:"ppf",name:"Past · Present · Future",positions:[
+  ["Past","What led here — the root or lingering influence."],
+  ["Present","The heart of the situation as it stands."],
+  ["Future","The direction things lean if the current course holds."]]},
+{id:"soa",name:"Situation · Obstacle · Advice",positions:[
+  ["Situation","The essential nature of what you're facing."],
+  ["Obstacle","What resists, blocks, or complicates."],
+  ["Advice","The most constructive stance to take."]]},
+{id:"mbs",name:"Mind · Body · Spirit",positions:[
+  ["Mind","Your mental state — thoughts, worries, clarity."],
+  ["Body","The physical and material layer — energy, health, resources."],
+  ["Spirit","The deeper current — meaning, intuition, what feeds you."]]},
+{id:"cc",name:"Celtic Cross",positions:[
+  ["Present","The heart of the matter."],
+  ["Challenge","What crosses or complicates it."],
+  ["Foundation","The root beneath the situation."],
+  ["Recent Past","What is receding."],
+  ["Crown","The conscious goal or best possible outcome."],
+  ["Near Future","What approaches next."],
+  ["Self","Your stance and how you see yourself in this."],
+  ["Environment","Outside influences — people, circumstances."],
+  ["Hopes & Fears","What you long for and dread, often entangled."],
+  ["Outcome","Where the current dynamics lean — not a verdict."]]}
+];
+
+const MOODS = ["calm","hopeful","anxious","overwhelmed","curious","tired","excited","tender"];
+const SUIT_LABEL = {major:"Major Arcana",wands:"Wands",cups:"Cups",swords:"Swords",pentacles:"Pentacles"};
+const SUIT_THEME = {wands:"action, will, and creative drive",cups:"emotion, relationships, and intuition",swords:"thought, conflict, and truth-telling",pentacles:"the material world — work, home, body, and money"};
+
+/* ═══════════════════ STORAGE (local file → localStorage; safe fallback) ═══════════════════ */
+let memoryStore = [];
+function loadJournal(){
+  try{ const raw = localStorage.getItem("tarotAtlasJournal"); return raw ? JSON.parse(raw) : []; }
+  catch(e){ return memoryStore; }
+}
+function saveJournal(entries){
+  memoryStore = entries;
+  try{ localStorage.setItem("tarotAtlasJournal", JSON.stringify(entries)); }catch(e){}
+}
+
+/* ═══════════════════ STATE ═══════════════════ */
+let state = { spread:null, mode:"digital", drawn:[], mood:null, revealedCount:0 };
+
+/* ═══════════════════ HELPERS ═══════════════════ */
+const $ = id => document.getElementById(id);
+function shuffleDraw(n, allowRev){
+  const idx = [...DECK.keys()];
+  for(let i=idx.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [idx[i],idx[j]]=[idx[j],idx[i]]; }
+  return idx.slice(0,n).map(i=>({card:i, reversed: allowRev && Math.random()<0.5}));
+}
+function cardName(i){ return DECK[i][0]; }
+function esc(s){ const d=document.createElement("div"); d.textContent=s; return d.innerHTML; }
+function fmtDate(ts){ return new Date(ts).toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric",year:"numeric"}); }
+/* ── card images: looks for ./cards/<slug>.jpg (then .png) next to this file; falls back to text design ── */
+function slug(name){ return name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,""); }
+function cardImgHTML(i, cls, withCaption){
+  const s = slug(cardName(i));
+  return `<img class="${cls}" src="cards/${s}.jpg" alt="${esc(cardName(i))}" loading="lazy"
+    onerror="if(!this.dataset.p){this.dataset.p=1;this.src='cards/${s}.png';}else{if(this.nextElementSibling&&this.nextElementSibling.classList.contains('imgcap'))this.nextElementSibling.remove();this.remove();}">` +
+    (withCaption?`<div class="imgcap">${esc(cardName(i))}</div>`:"");
+}
+
+/* ═══════════════════ NAV ═══════════════════ */
+document.querySelectorAll("nav button").forEach(b=>{
+  b.addEventListener("click",()=>showView(b.dataset.view));
+});
+function showView(v){
+  document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected", b.dataset.view===v));
+  document.querySelectorAll(".view").forEach(s=>s.classList.toggle("active", s.id==="view-"+v));
+  if(v==="journal") renderJournal();
+  if(v==="patterns") renderPatterns();
+  if(v==="sanctuary") renderSanctuary();
+  if(v==="study"){ renderStudy(); $("study-detail").classList.add("hidden"); }
+}
+
+/* ═══════════════════ SANCTUARY ═══════════════════ */
+function renderSanctuary(){
+  const j = loadJournal();
+  $("sanct-sub").textContent = j.length
+    ? `${j.length} reading${j.length===1?"":"s"} in your journal. Draw a daily card, or begin a full reading.`
+    : "Draw a single card for the day, or begin a full reading.";
+  const list = $("sanct-recent-list");
+  if(!j.length){ list.innerHTML = '<div class="empty">No readings yet. Your first one starts the Atlas.</div>'; return; }
+  list.innerHTML = j.slice(-3).reverse().map(e=>journalCardHTML(e)).join("");
+  list.querySelectorAll(".journal-entry").forEach(el=>el.addEventListener("click",()=>{showView("journal"); openDetail(el.dataset.id);}));
+}
+$("btn-daily").addEventListener("click",()=>{
+  const d = shuffleDraw(1,true)[0];
+  const c = DECK[d.card];
+  const kw = d.reversed ? c[4] : c[2];
+  const meaning = d.reversed ? c[5] : c[3];
+  $("daily-result").classList.remove("hidden");
+  $("daily-result").innerHTML = `
+    <div class="interp-card ${d.reversed?"rev":""}">
+      ${cardImgHTML(d.card,"daily-img"+(d.reversed?" reversed":""),false)}
+      <div class="pos-label">Daily card</div>
+      <div class="cname">${esc(c[0])}${d.reversed?" · reversed":""}</div>
+      <div class="kw">${esc(kw)}</div>
+      <div class="meaning">${esc(meaning)}</div>
+      <div class="poscontext">Carry it lightly — one lens for the day, not a forecast.</div>
+    </div>`;
+});
+$("btn-new-reading").addEventListener("click",()=>showView("reading"));
+
+/* ═══════════════════ READING SETUP ═══════════════════ */
+$("mood-chips").innerHTML = MOODS.map(m=>`<button class="chip" data-mood="${m}">${m}</button>`).join("");
+$("mood-chips").addEventListener("click",e=>{
+  const b = e.target.closest(".chip"); if(!b) return;
+  document.querySelectorAll("#mood-chips .chip").forEach(c=>c.classList.remove("on"));
+  b.classList.add("on"); state.mood = b.dataset.mood;
+});
+$("spread-grid").innerHTML = SPREADS.map(s=>`
+  <button class="spread-card" data-id="${s.id}">
+    <div class="n">${s.name}</div>
+    <div class="c">${s.positions.length} card${s.positions.length===1?"":"s"}</div>
+  </button>`).join("");
+$("spread-grid").addEventListener("click",e=>{
+  const b = e.target.closest(".spread-card"); if(!b) return;
+  document.querySelectorAll(".spread-card").forEach(c=>c.classList.remove("on"));
+  b.classList.add("on"); state.spread = SPREADS.find(s=>s.id===b.dataset.id);
+});
+document.querySelectorAll(".mode-btn").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".mode-btn").forEach(m=>m.classList.remove("on"));
+  b.classList.add("on"); state.mode = b.dataset.mode;
+}));
+
+/* ═══════════════════ DEAL ═══════════════════ */
+$("btn-deal").addEventListener("click",()=>{
+  if(!state.spread){ alert("Choose a spread first."); return; }
+  const allowRev = $("reversals").checked;
+  const n = state.spread.positions.length;
+  state.revealedCount = 0;
+  $("step-table").classList.remove("hidden");
+  $("step-interp").classList.add("hidden");
+  $("table-title").textContent = state.spread.name;
+  const pos = $("positions");
+  if(state.mode==="digital"){
+    state.drawn = shuffleDraw(n, allowRev);
+    pos.innerHTML = state.spread.positions.map((p,i)=>`
+      <div class="pos">
+        <div class="pname">${esc(p[0])}</div>
+        <div class="card-slot" data-i="${i}" role="button" tabindex="0" aria-label="Reveal ${esc(p[0])} card">
+          <div class="card-inner">
+            <div class="card-face card-back">✶</div>
+            <div class="card-face card-front ${state.drawn[i].reversed?"reversed":""}">
+              ${cardImgHTML(state.drawn[i].card,"card-img",true)}
+              <div class="cn">${esc(cardName(state.drawn[i].card))}</div>
+              ${state.drawn[i].reversed?'<div class="rev">Reversed</div>':""}
+            </div>
+          </div>
+        </div>
+      </div>`).join("");
+    $("btn-interpret").classList.add("hidden");
+    pos.querySelectorAll(".card-slot").forEach(slot=>{
+      const reveal=()=>{ if(slot.classList.contains("flipped"))return;
+        slot.classList.add("flipped"); state.revealedCount++;
+        if(state.revealedCount===n) $("btn-interpret").classList.remove("hidden"); };
+      slot.addEventListener("click",reveal);
+      slot.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();reveal();} });
+    });
+  } else {
+    state.drawn = state.spread.positions.map(()=>({card:null,reversed:false}));
+    const options = buildCardOptions();
+    pos.innerHTML = state.spread.positions.map((p,i)=>`
+      <div class="pos">
+        <div class="pname">${esc(p[0])}</div>
+        <div class="picker">
+          <select data-i="${i}" aria-label="Card for ${esc(p[0])}"><option value="">— card —</option>${options}</select>
+          <label class="revlab"><input type="checkbox" data-rev="${i}" ${allowRev?"":"disabled"}> reversed</label>
+        </div>
+      </div>`).join("");
+    $("btn-interpret").classList.add("hidden");
+    pos.querySelectorAll("select").forEach(s=>s.addEventListener("change",()=>{
+      state.drawn[+s.dataset.i].card = s.value===""?null:+s.value;
+      if(state.drawn.every(d=>d.card!==null)) $("btn-interpret").classList.remove("hidden");
+    }));
+    pos.querySelectorAll("input[data-rev]").forEach(c=>c.addEventListener("change",()=>{
+      state.drawn[+c.dataset.rev].reversed = c.checked;
+    }));
+  }
+  $("step-table").scrollIntoView({behavior:"smooth"});
+});
+function buildCardOptions(){
+  const groups = {};
+  DECK.forEach((c,i)=>{ (groups[c[1]] ||= []).push(`<option value="${i}">${esc(c[0])}</option>`); });
+  return Object.keys(SUIT_LABEL).map(k=>groups[k]?`<optgroup label="${SUIT_LABEL[k]}">${groups[k].join("")}</optgroup>`:"").join("");
+}
+
+/* ═══════════════════ INTERPRET ═══════════════════ */
+$("btn-interpret").addEventListener("click",()=>{
+  $("step-interp").classList.remove("hidden");
+  $("interp-cards").innerHTML = state.drawn.map((d,i)=>{
+    const c = DECK[d.card]; const p = state.spread.positions[i];
+    const kw = d.reversed?c[4]:c[2]; const m = d.reversed?c[5]:c[3];
+    return `<div class="interp-card ${d.reversed?"rev":""}">
+      <div class="pos-label">${esc(p[0])}</div>
+      <div class="cname">${esc(c[0])}${d.reversed?" · reversed":""}</div>
+      <div class="kw">${esc(kw)}</div>
+      <div class="meaning">${esc(m)}</div>
+      <div class="poscontext">In this position — ${esc(p[1].toLowerCase())} Consider how this card's energy answers that.</div>
+    </div>`;
+  }).join("");
+  $("interp-synth").innerHTML = `<h3>The larger story</h3>` + synthesize(state.drawn).map(s=>`<p>${esc(s)}</p>`).join("");
+  $("step-interp").scrollIntoView({behavior:"smooth"});
+});
+function synthesize(drawn){
+  const out = []; const n = drawn.length;
+  if(n===1){ out.push("A single card is a single lens. Sit with where it lands before deciding what it means."); return out; }
+  const suits = {}; let majors=0, revs=0, courts=0;
+  drawn.forEach(d=>{ const c=DECK[d.card]; suits[c[1]]=(suits[c[1]]||0)+1;
+    if(c[1]==="major")majors++; if(d.reversed)revs++;
+    if(/^(Page|Knight|Queen|King)/.test(c[0]))courts++; });
+  if(majors>=Math.ceil(n/2)) out.push(`${majors} of ${n} cards are Major Arcana — this reading carries archetypal weight. It may point past day-to-day logistics toward a larger chapter or lesson.`);
+  const minorSuits = Object.keys(suits).filter(s=>s!=="major");
+  const dominant = minorSuits.find(s=>suits[s]>=Math.ceil(n/2));
+  if(dominant) out.push(`${SUIT_LABEL[dominant]} dominate (${suits[dominant]} of ${n}) — the energy centers on ${SUIT_THEME[dominant]}.`);
+  const missing = ["wands","cups","swords","pentacles"].filter(s=>!suits[s]);
+  if(n>=4 && missing.length && missing.length<4) out.push(`Absent entirely: ${missing.map(s=>SUIT_LABEL[s]).join(", ")}. Sometimes what doesn't appear is the question — is that dimension being avoided, or simply settled?`);
+  if(revs>=Math.ceil(n/2)) out.push(`${revs} of ${n} cards fell reversed — much of this energy may be internalized, blocked, or still forming rather than expressed outwardly.`);
+  if(courts>=2) out.push(`${courts} court cards suggest specific people (or roles you're playing) figure heavily in this situation.`);
+  if(!out.length) out.push("A balanced spread — no single suit or force dominates. Read the positions as a conversation between equal voices.");
+  out.push("These are patterns to reflect on, not predictions. Note what resonates below; your later reflection is where the real reading happens.");
+  return out;
+}
+
+/* ═══════════════════ SAVE / DISCARD ═══════════════════ */
+$("btn-save-reading").addEventListener("click",()=>{
+  const entries = loadJournal();
+  entries.push({
+    id: Date.now().toString(36),
+    ts: Date.now(),
+    intention: $("intention").value.trim(),
+    mood: state.mood,
+    tags: $("tags").value.split(",").map(t=>t.trim().toLowerCase()).filter(Boolean),
+    spread: state.spread.name,
+    deck: "rws-1909",
+    mode: state.mode,
+    cards: state.drawn.map((d,i)=>({position:state.spread.positions[i][0], card:cardName(d.card), suit:DECK[d.card][1], reversed:d.reversed})),
+    synthesis: synthesize(state.drawn),
+    reflection: $("reflection").value.trim(),
+    laterReflection: ""
+  });
+  saveJournal(entries);
+  resetReading();
+  showView("journal");
+});
+$("btn-discard").addEventListener("click",()=>{ resetReading(); showView("sanctuary"); });
+function resetReading(){
+  $("intention").value=""; $("tags").value=""; $("reflection").value="";
+  document.querySelectorAll("#mood-chips .chip").forEach(c=>c.classList.remove("on"));
+  document.querySelectorAll(".spread-card").forEach(c=>c.classList.remove("on"));
+  $("step-table").classList.add("hidden"); $("step-interp").classList.add("hidden");
+  state = { spread:null, mode:state.mode, drawn:[], mood:null, revealedCount:0 };
+}
+
+/* ═══════════════════ JOURNAL ═══════════════════ */
+function journalCardHTML(e){
+  return `<div class="journal-entry" data-id="${e.id}">
+    <div class="d">${fmtDate(e.ts)} · ${esc(e.spread)}</div>
+    <div class="q">${esc(e.intention||"(no intention recorded)")}</div>
+    <div class="meta">${e.cards.map(c=>esc(c.card)+(c.reversed?" (r)":"")).join(" · ")}</div>
+    ${e.tags.map(t=>`<span class="tagpill">${esc(t)}</span>`).join("")}
+  </div>`;
+}
+function renderJournal(){
+  const q = $("journal-search").value.trim().toLowerCase();
+  let entries = loadJournal().slice().reverse();
+  if(q) entries = entries.filter(e=>
+    (e.intention||"").toLowerCase().includes(q) ||
+    e.tags.some(t=>t.includes(q)) ||
+    e.cards.some(c=>c.card.toLowerCase().includes(q)) ||
+    e.spread.toLowerCase().includes(q));
+  $("journal-list").innerHTML = entries.length ? entries.map(journalCardHTML).join("")
+    : `<div class="panel"><div class="empty">${q?"Nothing matches that search.":"No readings yet. The journal is the whole point — start one."}</div></div>`;
+  $("journal-list").querySelectorAll(".journal-entry").forEach(el=>el.addEventListener("click",()=>openDetail(el.dataset.id)));
+  $("journal-detail").classList.add("hidden");
+}
+$("journal-search").addEventListener("input",renderJournal);
+function openDetail(id){
+  const e = loadJournal().find(x=>x.id===id); if(!e) return;
+  const d = $("journal-detail");
+  d.classList.remove("hidden");
+  d.innerHTML = `
+    <div class="eyebrow">${fmtDate(e.ts)} · ${esc(e.spread)}${e.mood?" · feeling "+esc(e.mood):""}</div>
+    <h2>${esc(e.intention||"(no intention recorded)")}</h2>
+    <ul class="detail-cards">${e.cards.map(c=>`<li><strong>${esc(c.position)}:</strong> ${esc(c.card)}${c.reversed?" · reversed":""}</li>`).join("")}</ul>
+    ${e.synthesis?`<div class="synth"><h3>The larger story</h3>${e.synthesis.map(s=>`<p>${esc(s)}</p>`).join("")}</div>`:""}
+    ${e.reflection?`<label>First reflection</label><p>${esc(e.reflection)}</p>`:""}
+    <label for="later-reflection">Later reflection — what actually happened? What held up?</label>
+    <textarea id="later-reflection">${esc(e.laterReflection||"")}</textarea>
+    <div class="btn-row">
+      <button class="primary" id="btn-save-later">Save reflection</button>
+      <button class="ghost" id="btn-delete-entry">Delete reading</button>
+    </div>`;
+  $("btn-save-later").addEventListener("click",()=>{
+    const entries = loadJournal();
+    const target = entries.find(x=>x.id===id);
+    target.laterReflection = $("later-reflection").value.trim();
+    saveJournal(entries); renderJournal();
+  });
+  $("btn-delete-entry").addEventListener("click",()=>{
+    if(!confirm("Delete this reading? This can't be undone.")) return;
+    saveJournal(loadJournal().filter(x=>x.id!==id)); renderJournal();
+  });
+  d.scrollIntoView({behavior:"smooth"});
+}
+$("btn-export").addEventListener("click",()=>{
+  const blob = new Blob([JSON.stringify(loadJournal(),null,2)],{type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "tarot-atlas-journal.json";
+  a.click(); URL.revokeObjectURL(a.href);
+});
+$("btn-import").addEventListener("click",()=>$("import-file").click());
+$("import-file").addEventListener("change",e=>{
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = ()=>{ try{
+      const data = JSON.parse(r.result);
+      if(!Array.isArray(data)) throw 0;
+      saveJournal(data); renderJournal(); renderSanctuary();
+    }catch(err){ alert("That file isn't a Tarot Atlas journal export."); } };
+  r.readAsText(f);
+});
+
+/* ═══════════════════ PATTERNS ═══════════════════ */
+function renderPatterns(){
+  const j = loadJournal();
+  const stats = $("pattern-stats");
+  if(!j.length){
+    stats.innerHTML=""; 
+    $("pattern-cards").innerHTML='<div class="empty">No readings logged yet.</div>';
+    $("pattern-suits").innerHTML=""; $("pattern-tags").innerHTML=""; return;
+  }
+  const cardCounts={}, suitCounts={}, tagCounts={}; let totalCards=0;
+  j.forEach(e=>{ e.cards.forEach(c=>{ cardCounts[c.card]=(cardCounts[c.card]||0)+1; suitCounts[c.suit]=(suitCounts[c.suit]||0)+1; totalCards++; });
+    e.tags.forEach(t=>tagCounts[t]=(tagCounts[t]||0)+1); });
+  const withLater = j.filter(e=>e.laterReflection).length;
+  stats.innerHTML = `
+    <div class="stat"><div class="v">${j.length}</div><div class="l">Readings</div></div>
+    <div class="stat"><div class="v">${totalCards}</div><div class="l">Cards drawn</div></div>
+    <div class="stat"><div class="v">${Object.keys(cardCounts).length}</div><div class="l">Unique cards</div></div>
+    <div class="stat"><div class="v">${withLater}</div><div class="l">Closed loops</div></div>`;
+  const topCards = Object.entries(cardCounts).sort((a,b)=>b[1]-a[1]).slice(0,7);
+  const maxC = topCards[0][1];
+  $("pattern-cards").innerHTML = topCards.map(([name,ct])=>barHTML(name,ct,maxC)).join("");
+  const suitOrder = ["major","wands","cups","swords","pentacles"].filter(s=>suitCounts[s]);
+  const maxS = Math.max(...suitOrder.map(s=>suitCounts[s]));
+  $("pattern-suits").innerHTML = suitOrder.map(s=>barHTML(SUIT_LABEL[s],suitCounts[s],maxS)).join("");
+  const topTags = Object.entries(tagCounts).sort((a,b)=>b[1]-a[1]).slice(0,7);
+  $("pattern-tags").innerHTML = topTags.length
+    ? topTags.map(([t,ct])=>barHTML(t,ct,topTags[0][1])).join("")
+    : '<div class="empty">Tag your readings to see themes here.</div>';
+}
+function barHTML(label,val,max){
+  return `<div class="bar-row"><div class="bl">${esc(label)}</div>
+    <div class="bar-track"><div class="bar-fill" style="width:${Math.round(val/max*100)}%"></div></div>
+    <div class="bv">${val}</div></div>`;
+}
+
+/* ═══════════════════ STUDY MODE ═══════════════════ */
+/* Major Arcana deep entries: [astrology, RWS symbolism, across traditions, common misconception] — indexed 0–21 */
+const MAJOR_STUDY = [
+["Air · Uranus","A youth steps toward a cliff edge, white rose in hand (innocence), a small dog at his heels (instinct — companion or warning), the sun white behind him, everything he owns in one small bag.","Thoth: The Fool — zero as pure potential. Marseille: Le Mat, unnumbered, a wanderer prodded by an animal; closer to a vagabond than an innocent.","Not foolishness. The Fool is the willingness to begin before certainty is possible."],
+["Mercury","One hand raised to heaven, one pointing to earth — 'as above, so below.' All four suit emblems lie on his table; the infinity sign floats overhead; a snake-belt eats its own tail.","Thoth: The Magus — swifter, more mercurial, closer to trickster. Marseille: Le Bateleur, a street conjurer at his stall, keeping a note of sleight-of-hand in the card's history.","Not magic from nowhere. The Magician works with tools already on the table."],
+["Moon","Enthroned between the black and white pillars of Solomon's temple (Boaz and Jachin), a Torah scroll half-hidden in her lap, crescent moon at her feet, a veil of pomegranates behind her.","Thoth: The Priestess — luminous, abstract, almost pure light. Marseille: La Papesse, the female Pope, tied to the medieval Pope Joan legend.","Not passivity. Her stillness is active listening — knowledge held, not withheld."],
+["Venus","Ripe wheat, a flowing river, a cushioned throne bearing the shield of Venus, a pomegranate robe, a crown of twelve stars — nature at full abundance.","Thoth and Marseille broadly agree here; Thoth adds alchemical salt and 'the gate of heaven.'","Not only motherhood. She rules every kind of generativity — gardens, businesses, bodies of work."],
+["Aries","A stone throne carved with rams' heads set in a barren mountain range — order imposed on hard terrain. Armor shows beneath his robe; the ankh scepter is life held as authority.","Marseille: L'Empereur sits relaxed, legs crossed, in profile — authority at ease rather than enthroned head-on.","Not the deck's villain. Structure is what makes the Empress's garden defensible."],
+["Taurus","A papal figure between two pillars, crossed keys at his feet, two tonsured acolytes below — the transmission of teaching through lineage and form.","Thoth: The Hierophant is radically reworked around the Taurean bull. Marseille: Le Pape — plainly the Pope.","Not blind conformity. The card asks what the tradition knows — not that you obey it."],
+["Gemini","Adam and Eve beneath the archangel Raphael; the tree of knowledge (with serpent) behind her, a tree of twelve flames behind him — choice and consequence built into the image itself.","Marseille: L'Amoureux shows a man choosing between two women beneath Cupid — explicitly a card of decision. Thoth: an alchemical royal marriage.","Not simply romance. The older card is a values-level fork in the road."],
+["Cancer","An armored figure in a stone chariot drawn by black and white sphinxes facing opposite directions — and no reins. Control by will, not force; a canopy of stars overhead.","Marseille: two horses, often mismatched, pull a canopied prince. Thoth: four sphinxes and a grail-bearing charioteer.","Not effortless victory. The sphinxes pull opposite ways — the win is holding them together."],
+["Leo","A woman calmly closes (or opens — readers disagree) a lion's jaws, the infinity sign above her head, a garland for a belt. Appetite gentled, not conquered.","Thoth: Lust (XI) — Crowley recasts restraint as ecstatic embrace of vital force. Marseille: La Force, numbered XI; the RWS deck swapped Strength and Justice's numbers.","Not domination. The lion is part of you — the card depicts a partnership."],
+["Virgo","A grey-robed elder on a snow peak holds a lantern containing a six-pointed star — light carried for others climbing behind, a staff steadying the long way up.","Marseille: L'Hermite half-hides the lamp in his cloak. Thoth adds Cerberus and the wheat of Virgo.","Not loneliness. The withdrawal is purposeful and temporary — and the lamp faces outward."],
+["Jupiter","A wheel inscribed TARO/ROTA, sphinx enthroned on top, serpent descending one side, Anubis rising the other; the four fixed-sign creatures read books in the corners.","Marseille: a crank-driven wheel with animal figures rising and falling. Thoth: Fortune.","Not pure luck. The figures on the rim move — the center of the wheel doesn't."],
+["Libra","A crowned figure holds an upright sword and balanced scales between two pillars. The sword is double-edged; the veil behind hides nothing.","Thoth: Adjustment — dynamic equilibrium rather than a verdict. Marseille numbers Justice VIII, the older order.","Not karma delivered from outside. The card usually points at your own accounting."],
+["Water · Neptune","A man hangs by one foot from a living, T-shaped tree — face serene, halo bright, legs crossed in a figure four. The sacrifice is chosen, not imposed.","Marseille: Le Pendu — historically the pose used in 'shame portraits' of traitors, later inverted into willing surrender.","Not helplessness. The Hanged Man put himself there, and can come down."],
+["Scorpio","A skeleton in black armor rides a white horse under a banner of the white rose; a king lies fallen, a child looks on unafraid, and the sun rises between two distant towers.","Marseille often leaves card XIII unnamed — 'the arcane without a name.' Thoth: a scything figure weaving new life from the old.","Almost never literal death. The card marks endings that clear ground — the most retired fear in tarot."],
+["Sagittarius","A winged angel pours water between two cups at an impossible angle, one foot on land, one in water; a path runs back toward a crowned, glowing horizon.","Thoth: Art — the alchemical fusion of opposites, the Lovers' marriage completed. Marseille: Tempérance, largely the same image.","Not mere moderation. The deeper card is active blending — making a third thing from two."],
+["Capricorn","A Baphomet-like figure looms over two chained human figures — but the chains hang loose enough to lift off. An inverted pentagram crowns the scene.","Marseille: a stranger, almost comic devil with two small imps. Thoth: a laughing goat before a great pillar — creative force bound.","Not evil or possession. The card is about chosen chains — habits, contracts, appetites, stories."],
+["Mars","Lightning strikes the crown from a tower built on a peak; two figures fall; twenty-two flaming Yods rain down. A structure built on a false premise meets sudden truth.","Marseille: La Maison Dieu — 'the House of God' — sometimes read as divine spark rather than ruin.","Not punishment. The Tower was already unsound; the lightning just made it visible."],
+["Aquarius","A naked figure kneels, pouring water onto land and pool beneath one great star and seven lesser ones; an ibis watches from a tree. Nothing hidden, nothing armored.","Remarkably consistent across traditions; the Thoth Star is among that deck's most loved cards.","Not a promise that things are fixed. The Star is hope with work still to do — the calm after the Tower."],
+["Pisces","A dog and a wolf howl at a moon that drips dew; a crayfish crawls from the pool; a path runs between two towers into unknown hills.","Marseille is nearly identical — one of the most stable images in tarot's whole history.","Usually not deceit by others. The distortion in this card is mostly your own fear doing the drawing."],
+["Sun","A naked child rides a white horse before a wall of sunflowers under a huge, human-faced sun. Nothing concealed, nothing feared.","Marseille: two children beneath the sun, sometimes read as the Gemini twins.","Even 'the best card in the deck' isn't a guarantee — it describes conditions, not verdicts."],
+["Fire · Pluto","The archangel Gabriel sounds a trumpet; the dead rise from open coffins with open arms. A summons answered — an old self left behind in the box.","Thoth: The Aeon — Crowley replaces resurrection with the birth of a new age.","Not condemnation. The card is amnesty: the past reviewed, then released."],
+["Saturn","A dancer wreathed in laurel holds two wands, the four fixed creatures in the corners — the Fool's journey closed into a circle.","Thoth: The Universe. Marseille: Le Monde, nearly the same figure.","Completion isn't stopping. The wreath is a doorway — the next Fool's step goes through it."]
+];
+/* Golden Dawn decan attributions for numbered minors 2–10 (index 0 = Two) */
+const DECANS = {
+wands:["Mars in Aries","Sun in Aries","Venus in Aries","Saturn in Leo","Jupiter in Leo","Mars in Leo","Mercury in Sagittarius","Moon in Sagittarius","Saturn in Sagittarius"],
+cups:["Venus in Cancer","Mercury in Cancer","Moon in Cancer","Mars in Scorpio","Sun in Scorpio","Venus in Scorpio","Saturn in Pisces","Jupiter in Pisces","Mars in Pisces"],
+swords:["Moon in Libra","Saturn in Libra","Jupiter in Libra","Venus in Aquarius","Mercury in Aquarius","Moon in Aquarius","Jupiter in Gemini","Mars in Gemini","Sun in Gemini"],
+pentacles:["Jupiter in Capricorn","Mars in Capricorn","Sun in Capricorn","Mercury in Taurus","Moon in Taurus","Saturn in Taurus","Sun in Virgo","Venus in Virgo","Mercury in Virgo"]};
+/* Thoth keyword titles for numbered minors 2–10 */
+const THOTH = {
+wands:["Dominion","Virtue","Completion","Strife","Victory","Valour","Swiftness","Strength","Oppression"],
+cups:["Love","Abundance","Luxury","Disappointment","Pleasure","Debauch","Indolence","Happiness","Satiety"],
+swords:["Peace","Sorrow","Truce","Defeat","Science","Futility","Interference","Cruelty","Ruin"],
+pentacles:["Change","Works","Power","Worry","Success","Failure","Prudence","Gain","Wealth"]};
+const ELEMENTS = {wands:"Fire",cups:"Water",swords:"Air",pentacles:"Earth"};
+const NUMEROLOGY = ["The seed — pure, undivided potential of the suit.","Duality — partnership, choice, balance, first tension.","Growth — expression, expansion, the first real result.","Stability — structure, consolidation, sometimes stasis.","Disruption — challenge, friction, the pattern tested.","Harmony — exchange, generosity, equilibrium restored.","Assessment — inner work, patience, re-evaluation.","Movement — power, mastery, acceleration.","Culmination — the near-complete, intensity at its peak.","Completion — the cycle's end and the weight or fullness it leaves."];
+const COURTS = {
+"Page":"The student and messenger of the suit — beginnings, curiosity, news, an energy still learning itself.",
+"Knight":"The quest — the suit's energy in motion, pursuing, sometimes to excess.",
+"Queen":"Inward mastery — the suit's element fully embodied and expressed through relationship and atmosphere.",
+"King":"Outward mastery — the suit's element directed as leadership, decision, and structure."};
+const MINOR_TRAD = "Marseille-style decks leave the numbered minors unillustrated — just arranged suit symbols — read through number and suit. Fully scened minors were the Rider–Waite–Smith deck's great innovation, drawn by Pamela Colman Smith in 1909. The Thoth deck takes a third path: abstract compositions with a keyword title per card.";
+function studyRank(i){ return i<22 ? null : (i-22)%14; } /* 0=Ace,1–9=2–10,10–13=courts */
+function renderStudy(){
+  const q = $("study-search").value.trim().toLowerCase();
+  const suitFilter = document.querySelector("#study-suits .chip.on")?.dataset.suit || "";
+  let items = DECK.map((c,i)=>({i,name:c[0],suit:c[1]}));
+  if(suitFilter) items = items.filter(x=>x.suit===suitFilter);
+  if(q) items = items.filter(x=>x.name.toLowerCase().includes(q));
+  $("study-grid").innerHTML = items.map(x=>`<button class="study-item" data-i="${x.i}">${esc(x.name)}</button>`).join("") || '<div class="empty">No card matches.</div>';
+  $("study-grid").querySelectorAll(".study-item").forEach(b=>b.addEventListener("click",()=>openStudy(+b.dataset.i)));
+}
+$("study-suits").innerHTML = Object.entries(SUIT_LABEL).map(([k,v])=>`<button class="chip" data-suit="${k}">${v}</button>`).join("");
+$("study-suits").addEventListener("click",e=>{
+  const b = e.target.closest(".chip"); if(!b) return;
+  const wasOn = b.classList.contains("on");
+  document.querySelectorAll("#study-suits .chip").forEach(c=>c.classList.remove("on"));
+  if(!wasOn) b.classList.add("on");
+  renderStudy();
+});
+$("study-search").addEventListener("input",renderStudy);
+function openStudy(i){
+  const c = DECK[i]; const rank = studyRank(i); const isMajor = i<22;
+  const d = $("study-detail"); d.classList.remove("hidden");
+  /* correspondences */
+  let corr = [];
+  if(isMajor){ corr.push(["Astrology",MAJOR_STUDY[i][0]],["Arcana","Major · "+["0","I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV","XV","XVI","XVII","XVIII","XIX","XX","XXI"][i]]); }
+  else{
+    corr.push(["Element",ELEMENTS[c[1]]]);
+    if(rank===0) corr.push(["Position","Ace — root of "+ELEMENTS[c[1]]]);
+    else if(rank<=9) corr.push(["Number",String(rank+1)],["Decan",DECANS[c[1]][rank-1]],["Thoth title",THOTH[c[1]][rank-1]]);
+    else corr.push(["Court",c[0].split(" ")[0]]);
+  }
+  /* symbolism / study text */
+  let symbolism, traditions, misconception="";
+  if(isMajor){ symbolism = MAJOR_STUDY[i][1]; traditions = MAJOR_STUDY[i][2]; misconception = MAJOR_STUDY[i][3]; }
+  else{
+    const courtName = rank>=10 ? c[0].split(" ")[0] : null;
+    symbolism = courtName
+      ? `${COURTS[courtName]} Here that energy moves through ${ELEMENTS[c[1]]} — ${SUIT_THEME[c[1]]}.`
+      : `${NUMEROLOGY[rank]} Expressed through ${ELEMENTS[c[1]]} — ${SUIT_THEME[c[1]]} — this becomes: ${c[2]}.`;
+    traditions = MINOR_TRAD;
+  }
+  /* journal appearances */
+  const appearances = loadJournal().filter(e=>e.cards.some(x=>x.card===c[0])).slice(-5).reverse();
+  d.innerHTML = `
+    <div class="eyebrow">${SUIT_LABEL[c[1]]}</div>
+    <h2>${esc(c[0])}</h2>
+    ${cardImgHTML(i,"study-img",false)}
+    <div class="corr-grid">${corr.map(([l,v])=>`<div class="corr"><div class="cl">${l}</div><div class="cv">${esc(v)}</div></div>`).join("")}</div>
+    <div class="study-section"><h3>Upright</h3><p><strong>${esc(c[2])}.</strong> ${esc(c[3])}</p></div>
+    <div class="study-section"><h3>Reversed</h3><p><strong>${esc(c[4])}.</strong> ${esc(c[5])}</p></div>
+    <div class="study-section"><h3>${isMajor?"Rider–Waite–Smith imagery":"How to build this card's meaning"}</h3><p>${esc(symbolism)}</p></div>
+    <div class="study-section"><h3>Across traditions</h3><p>${esc(traditions)}</p></div>
+    ${misconception?`<div class="study-section"><h3>Common misconception</h3><p>${esc(misconception)}</p></div>`:""}
+    <div class="study-section"><h3>Journal prompts</h3><ul class="prompt-list">
+      <li>Where is <em>${esc(c[2].split(",")[0])}</em> present in your life right now — and is it welcome?</li>
+      <li>If this card described the week ahead, what would you do differently on Monday?</li>
+      <li>Reversed, this card points to <em>${esc(c[4].split(",")[0])}</em>. Where might that be operating quietly?</li>
+    </ul></div>
+    <div class="study-section"><h3>Sit with it</h3><p>Two minutes, eyes on the card (or the name, if the deck's away). Breathe slowly and notice which of its keywords — ${esc(c[2])} — pulls at you first. That pull is your personal entry in this card's dictionary.</p></div>
+    <div class="study-section"><h3>In your journal</h3>
+      ${appearances.length
+        ? `<p>${esc(c[0])} has appeared in ${appearances.length===5?"at least ":""}${appearances.length} of your readings.</p>` +
+          appearances.map(e=>`<div class="study-appearance" data-id="${e.id}"><div class="sd">${fmtDate(e.ts)} · ${esc(e.spread)}</div>${esc(e.intention||"(no intention recorded)")}</div>`).join("")
+        : `<p class="empty">This card hasn't appeared in your readings yet. When it does, your history with it starts here.</p>`}
+    </div>
+    <div class="btn-row"><button class="ghost" id="btn-study-back">← All cards</button></div>`;
+  $("btn-study-back").addEventListener("click",()=>{ d.classList.add("hidden"); $("study-browse").scrollIntoView(); });
+  d.querySelectorAll(".study-appearance").forEach(el=>el.addEventListener("click",()=>{ showView("journal"); openDetail(el.dataset.id); }));
+  d.scrollIntoView({behavior:"smooth"});
+}
+
+/* init */
+renderSanctuary();
+renderStudy();
+</script>
+</body>
+</html>
