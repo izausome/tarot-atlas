@@ -185,6 +185,8 @@ footer{max-width:960px;margin:0 auto;padding:0 20px 30px;font-size:.74rem;color:
   padding:10px 12px;cursor:pointer;text-align:left;
 }
 .study-item:hover{border-color:var(--gold);background:var(--gold-soft)}
+.study-item{display:flex;align-items:center;gap:8px}
+.study-item .thumb{cursor:pointer;flex-shrink:0;margin-right:0}
 .study-section{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
 .study-section h3{display:flex;align-items:center;gap:8px}
 .study-section h3::before{content:"✶";color:var(--gold);font-size:.8rem}
@@ -232,7 +234,8 @@ footer{max-width:960px;margin:0 auto;padding:0 20px 30px;font-size:.74rem;color:
 .lightbox img.reversed{transform:rotate(180deg)}
 .lightbox .lbname{color:var(--cream);font-family:'Fraunces',serif;font-weight:600;font-size:1.05rem}
 .study-img{display:block;max-height:280px;max-width:180px;border-radius:8px;border:2px solid var(--gold);margin:12px auto 0}
-.daily-img{float:right;max-height:150px;border-radius:6px;border:2px solid var(--gold);margin:0 0 8px 12px}
+.daily-img{float:right;max-height:170px;border-radius:6px;border:2px solid var(--gold);margin:0 0 8px 12px}
+#daily-result .interp-card{overflow:hidden}
 .daily-img.reversed,.study-img.reversed{transform:rotate(180deg)}
 </style>
 </head>
@@ -369,7 +372,7 @@ footer{max-width:960px;margin:0 auto;padding:0 20px 30px;font-size:.74rem;color:
       <button class="ghost" id="btn-import">Import journal</button>
       <input type="file" id="import-file" accept=".json" class="hidden">
     </div>
-    <p class="note">Your journal lives in this browser. Export a copy now and then as a backup — import merges by reading, so bringing in a file from another device never overwrites what's here.</p>
+    <p class="note" id="backup-note"></p>
   </div>
   <div id="journal-list"></div>
   <div class="panel hidden" id="journal-detail"></div>
@@ -571,7 +574,7 @@ document.querySelectorAll("nav button").forEach(b=>{
 function showView(v){
   document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected", b.dataset.view===v));
   document.querySelectorAll(".view").forEach(s=>s.classList.toggle("active", s.id==="view-"+v));
-  if(v==="journal") renderJournal();
+  if(v==="journal"){ renderJournal(); renderBackupNote(); }
   if(v==="patterns") renderPatterns();
   if(v==="sanctuary") renderSanctuary();
   if(v==="study"){ renderStudy(); $("study-detail").classList.add("hidden"); }
@@ -857,6 +860,15 @@ function renderJournal(){
   $("journal-detail").classList.add("hidden");
 }
 $("journal-search").addEventListener("input",renderJournal);
+function renderBackupNote(){
+  let le = 0; try{ le = +localStorage.getItem("tarotAtlasLastExport")||0; }catch(e){}
+  const total = loadJournal().length;
+  let msg = "Your journal lives in this browser — clearing site data (or, in Safari, not visiting for a week) can erase it. Exported files are your durable copy. ";
+  if(total) msg += le ? `Last export: ${new Date(le).toLocaleDateString()}.` : "Never exported yet.";
+  if(total && (!le || Date.now()-le > 7*86400000)) msg += " A fresh export would be a good idea.";
+  msg += " Import merges by reading — nothing gets overwritten.";
+  $("backup-note").textContent = msg;
+}
 function openDetail(id){
   const e = loadJournal().find(x=>x.id===id); if(!e) return;
   const d = $("journal-detail");
@@ -891,6 +903,8 @@ function openDetail(id){
   d.scrollIntoView({behavior:"smooth"});
 }
 $("btn-export").addEventListener("click",()=>{
+  try{ localStorage.setItem("tarotAtlasLastExport", String(Date.now())); }catch(e){}
+  renderBackupNote();
   const blob = new Blob([JSON.stringify(loadJournal(),null,2)],{type:"application/json"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -1008,7 +1022,7 @@ function renderStudy(){
   let items = DECK.map((c,i)=>({i,name:c[0],suit:c[1]}));
   if(suitFilter) items = items.filter(x=>x.suit===suitFilter);
   if(q) items = items.filter(x=>x.name.toLowerCase().includes(q));
-  $("study-grid").innerHTML = items.map(x=>`<button class="study-item" data-i="${x.i}">${esc(x.name)}</button>`).join("") || '<div class="empty">No card matches.</div>';
+  $("study-grid").innerHTML = items.map(x=>`<button class="study-item" data-i="${x.i}">${cardImgHTML(x.i,"thumb")}<span>${esc(x.name)}</span></button>`).join("") || '<div class="empty">No card matches.</div>';
   $("study-grid").querySelectorAll(".study-item").forEach(b=>b.addEventListener("click",()=>openStudy(+b.dataset.i)));
 }
 $("study-suits").innerHTML = Object.entries(SUIT_LABEL).map(([k,v])=>`<button class="chip" data-suit="${k}">${v}</button>`).join("");
@@ -1092,7 +1106,7 @@ $("btn-patterns-guide").addEventListener("click",()=>{
 /* ── lightbox: click any card image to enlarge ── */
 document.addEventListener("click",e=>{
   const img = e.target.closest("img.card-img, img.daily-img, img.study-img, img.thumb");
-  if(!img) return;
+  if(!img || img.closest(".study-item")) return;
   /* table cards: only enlarge once revealed */
   const slot = img.closest(".card-slot");
   if(slot && !slot.classList.contains("flipped")) return;
