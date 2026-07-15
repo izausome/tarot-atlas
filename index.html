@@ -112,25 +112,31 @@ textarea{min-height:70px;resize:vertical}
 .positions{display:flex;flex-wrap:wrap;gap:16px;justify-content:center}
 .pos{width:110px;text-align:center}
 .pos .pname{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;min-height:2.1em}
-.card-slot{width:100px;height:160px;margin:0 auto;perspective:800px;cursor:pointer}
-.card-inner{position:relative;width:100%;height:100%;transition:transform .6s;transform-style:preserve-3d}
+.card-slot{width:100px;aspect-ratio:58/100;margin:0 auto;perspective:900px;cursor:pointer}
+.card-inner{position:relative;width:100%;height:100%;transition:transform .6s;transform-style:preserve-3d;-webkit-transform-style:preserve-3d}
 .card-slot.flipped .card-inner{transform:rotateY(180deg)}
+.pos .cardname{font-size:.72rem;font-weight:700;color:var(--cream);margin-top:7px;line-height:1.25;visibility:hidden}
+.pos.revealed .cardname{visibility:visible}
+.pos .cardname .revtag{color:var(--gold);font-weight:500}
 @media (prefers-reduced-motion:reduce){.card-inner{transition:none}}
 .card-face{
-  position:absolute;inset:0;backface-visibility:hidden;border-radius:8px;
-  display:flex;align-items:center;justify-content:center;padding:8px;
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;padding:8px;overflow:hidden;
 }
 .card-back{
   background:var(--navy-deep);border:2px solid var(--gold);color:var(--gold);
   font-size:1.6rem;
 }
 .card-front{
-  background:var(--ivory);border:2px solid var(--gold);transform:rotateY(180deg);
+  background:var(--ivory);border:2px solid var(--gold);
+  transform:rotateY(180deg);-webkit-transform:rotateY(180deg);
   flex-direction:column;gap:4px;text-align:center;
 }
 .card-front .cn{font-family:'Fraunces',serif;font-weight:600;font-size:.8rem;color:var(--navy);line-height:1.2}
 .card-front .rev{font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--terracotta)}
-.card-front.reversed{transform:rotateY(180deg) rotate(180deg)}
+.card-front.reversed{transform:rotateY(180deg) rotate(180deg);-webkit-transform:rotateY(180deg) rotate(180deg)}
+.card-front.reversed .cn,.card-front.reversed .rev{transform:rotate(180deg)}
 .pos .picker{margin-top:6px}
 .pos select{font-size:.72rem;padding:6px}
 .pos .revlab{font-size:.68rem;color:var(--cream);display:flex;align-items:center;gap:4px;justify-content:center;margin-top:4px}
@@ -170,7 +176,7 @@ textarea{min-height:70px;resize:vertical}
 .note{font-size:.78rem;color:var(--ink-soft);margin-top:10px}
 .hidden{display:none!important}
 footer{max-width:960px;margin:0 auto;padding:0 20px 30px;font-size:.74rem;color:var(--ink-soft)}
-@media(max-width:520px){.pos{width:96px}.card-slot{width:88px;height:142px}}
+@media(max-width:520px){.pos{width:96px}.card-slot{width:88px}}
 /* study mode */
 .study-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:12px}
 .study-item{
@@ -192,9 +198,39 @@ footer{max-width:960px;margin:0 auto;padding:0 20px 30px;font-size:.74rem;color:
 .study-appearance:hover{border-color:var(--sage)}
 .study-appearance .sd{font-size:.7rem;font-weight:700;color:var(--terracotta);text-transform:uppercase;letter-spacing:.06em}
 /* card images */
-.card-front{overflow:hidden;position:relative}
-.card-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:6px;z-index:1}
-.card-front .imgcap{position:absolute;left:0;right:0;bottom:0;z-index:2;background:rgba(34,48,63,.82);color:var(--cream);font-size:.6rem;font-weight:700;padding:3px 4px;letter-spacing:.03em}
+.card-img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border-radius:6px;z-index:1}
+/* shuffle stack */
+.shuffle-stack{display:inline-block;position:relative;width:64px;height:96px;margin:14px 18px 0 4px;vertical-align:middle}
+.shuffle-stack span{position:absolute;inset:0;background:var(--navy-deep);border:2px solid var(--gold);border-radius:6px;color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+.shuffle-stack span:nth-child(1){transform:rotate(-5deg) translateX(-4px)}
+.shuffle-stack span:nth-child(3){transform:rotate(5deg) translateX(4px)}
+.shuffle-stack.riffle span:nth-child(1){animation:rif1 .45s ease}
+.shuffle-stack.riffle span:nth-child(2){animation:rif2 .45s ease}
+.shuffle-stack.riffle span:nth-child(3){animation:rif3 .45s ease}
+@keyframes rif1{50%{transform:rotate(-14deg) translate(-16px,-6px)}}
+@keyframes rif2{50%{transform:rotate(3deg) translateY(-12px)}}
+@keyframes rif3{50%{transform:rotate(14deg) translate(16px,-6px)}}
+@media (prefers-reduced-motion:reduce){.shuffle-stack.riffle span{animation:none}}
+.shuffle-count{font-size:.82rem;color:var(--ink-soft);display:inline-block;vertical-align:middle;margin-top:14px}
+#live-meanings{margin-top:14px}
+/* side-by-side reflection on desktop */
+@media(min-width:900px){
+  .interp-wrap{display:grid;grid-template-columns:1fr 340px;gap:22px;align-items:start}
+  .reflect-side{position:sticky;top:16px}
+  .reflect-side textarea{min-height:220px}
+}
+/* journal thumbnails + study links */
+.thumbrow{margin-top:6px}
+.thumb{width:26px;aspect-ratio:58/100;object-fit:cover;border-radius:3px;border:1px solid var(--gold);vertical-align:middle;margin-right:5px}
+.thumb.reversed{transform:rotate(180deg)}
+.cname-link{background:none;border:none;padding:0;cursor:pointer;font-family:'Fraunces',serif;font-weight:600;font-size:1.05rem;color:var(--navy);text-decoration:underline dotted var(--gold);text-underline-offset:3px;text-align:left}
+.cname-link:hover{color:var(--terracotta)}
+/* lightbox */
+.card-img,.daily-img,.study-img,.thumb{cursor:zoom-in}
+.lightbox{position:fixed;inset:0;background:rgba(34,48,63,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:99;cursor:zoom-out}
+.lightbox img{max-height:84vh;max-width:90vw;border-radius:10px;border:3px solid var(--gold)}
+.lightbox img.reversed{transform:rotate(180deg)}
+.lightbox .lbname{color:var(--cream);font-family:'Fraunces',serif;font-weight:600;font-size:1.05rem}
 .study-img{display:block;max-height:280px;max-width:180px;border-radius:8px;border:2px solid var(--gold);margin:12px auto 0}
 .daily-img{float:right;max-height:150px;border-radius:6px;border:2px solid var(--gold);margin:0 0 8px 12px}
 .daily-img.reversed,.study-img.reversed{transform:rotate(180deg)}
@@ -274,7 +310,17 @@ footer{max-width:960px;margin:0 auto;padding:0 20px 30px;font-size:.74rem;color:
       <input type="checkbox" id="reversals" checked>
       <label for="reversals" style="margin:0">Allow reversals</label>
     </div>
+    <label>Reveal meanings</label>
+    <div class="chip-row" id="reveal-chips">
+      <button class="chip on" data-reveal="end">All at the end</button>
+      <button class="chip" data-reveal="live">As each card is revealed</button>
+    </div>
+    <div id="shuffle-area">
+      <div class="shuffle-stack" id="shuffle-stack" aria-hidden="true"><span>✶</span><span>✶</span><span>✶</span></div>
+      <span class="shuffle-count" id="shuffle-count">The deck is already random — shuffle only if it's part of your ritual.</span>
+    </div>
     <div class="btn-row">
+      <button class="ghost" id="btn-shuffle">Shuffle</button>
       <button class="secondary" id="btn-deal">Deal the cards</button>
     </div>
   </div>
@@ -283,6 +329,7 @@ footer{max-width:960px;margin:0 auto;padding:0 20px 30px;font-size:.74rem;color:
     <div class="eyebrow">Step 4 · The table</div>
     <h2 id="table-title"></h2>
     <div class="table-felt"><div class="positions" id="positions"></div></div>
+    <div id="live-meanings"></div>
     <div class="btn-row">
       <button class="primary hidden" id="btn-interpret">Interpret the reading</button>
     </div>
@@ -292,13 +339,19 @@ footer{max-width:960px;margin:0 auto;padding:0 20px 30px;font-size:.74rem;color:
     <div class="eyebrow">Step 5 · Interpretation</div>
     <h2>What the cards are saying</h2>
     <p class="lede">These are starting points for reflection, not fixed outcomes.</p>
-    <div class="interp" id="interp-cards"></div>
-    <div class="synth" id="interp-synth"></div>
-    <label for="reflection">First reflection — what resonates? What doesn't?</label>
-    <textarea id="reflection"></textarea>
-    <div class="btn-row">
-      <button class="secondary" id="btn-save-reading">Save to journal</button>
-      <button class="ghost" id="btn-discard">Discard</button>
+    <div class="interp-wrap">
+      <div class="interp-left">
+        <div class="interp" id="interp-cards"></div>
+        <div class="synth" id="interp-synth"></div>
+      </div>
+      <div class="reflect-side">
+        <label for="reflection" style="margin-top:0">First reflection — what resonates? What doesn't?</label>
+        <textarea id="reflection"></textarea>
+        <div class="btn-row">
+          <button class="secondary" id="btn-save-reading">Save to journal</button>
+          <button class="ghost" id="btn-discard">Discard</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -316,7 +369,7 @@ footer{max-width:960px;margin:0 auto;padding:0 20px 30px;font-size:.74rem;color:
       <button class="ghost" id="btn-import">Import journal</button>
       <input type="file" id="import-file" accept=".json" class="hidden">
     </div>
-    <p class="note">Your journal lives in this browser. Export a copy now and then as a backup.</p>
+    <p class="note">Your journal lives in this browser. Export a copy now and then as a backup — import merges by reading, so bringing in a file from another device never overwrites what's here.</p>
   </div>
   <div id="journal-list"></div>
   <div class="panel hidden" id="journal-detail"></div>
@@ -344,6 +397,7 @@ footer{max-width:960px;margin:0 auto;padding:0 20px 30px;font-size:.74rem;color:
     <div class="eyebrow">Study Mode</div>
     <h2>Teach me a card</h2>
     <p class="lede">Symbolism, correspondences, tradition differences, and your own history with each card.</p>
+    <div class="btn-row" style="margin-top:4px"><button class="ghost" id="btn-patterns-guide">✶ How to read patterns — suits, reversals, Majors</button></div>
     <label for="study-search">Find a card</label>
     <input type="text" id="study-search" placeholder="Strength, Queen of Pentacles…">
     <div class="chip-row" id="study-suits"></div>
@@ -447,21 +501,21 @@ const DECK = [
 
 /* ═══════════════════ SPREADS ═══════════════════ */
 const SPREADS = [
-{id:"one",name:"One-Card Guidance",positions:[
+{id:"one",name:"One-Card Guidance",d:"A single lens for a focused question or a quick check-in.",positions:[
   ["Guidance","What most needs your attention right now."]]},
-{id:"ppf",name:"Past · Present · Future",positions:[
+{id:"ppf",name:"Past · Present · Future",d:"The classic timeline — how the past feeds the present, and where the current leans.",positions:[
   ["Past","What led here — the root or lingering influence."],
   ["Present","The heart of the situation as it stands."],
   ["Future","The direction things lean if the current course holds."]]},
-{id:"soa",name:"Situation · Obstacle · Advice",positions:[
+{id:"soa",name:"Situation · Obstacle · Advice",d:"Practical problem-solving: what is happening, what resists, what stance to take.",positions:[
   ["Situation","The essential nature of what you're facing."],
   ["Obstacle","What resists, blocks, or complicates."],
   ["Advice","The most constructive stance to take."]]},
-{id:"mbs",name:"Mind · Body · Spirit",positions:[
+{id:"mbs",name:"Mind · Body · Spirit",d:"A self check-in across three layers of wellbeing.",positions:[
   ["Mind","Your mental state — thoughts, worries, clarity."],
   ["Body","The physical and material layer — energy, health, resources."],
   ["Spirit","The deeper current — meaning, intuition, what feeds you."]]},
-{id:"cc",name:"Celtic Cross",positions:[
+{id:"cc",name:"Celtic Cross",d:"The deep-dive classic: ten cards mapping the heart of a situation, its roots and recent past, your stance, outside influences, hopes and fears, and trajectory. Best for big, tangled questions — give it time.",positions:[
   ["Present","The heart of the matter."],
   ["Challenge","What crosses or complicates it."],
   ["Foundation","The root beneath the situation."],
@@ -490,7 +544,7 @@ function saveJournal(entries){
 }
 
 /* ═══════════════════ STATE ═══════════════════ */
-let state = { spread:null, mode:"digital", drawn:[], mood:null, revealedCount:0 };
+let state = { spread:null, mode:"digital", drawn:[], mood:null, revealedCount:0, revealMode:"end" };
 
 /* ═══════════════════ HELPERS ═══════════════════ */
 const $ = id => document.getElementById(id);
@@ -504,11 +558,10 @@ function esc(s){ const d=document.createElement("div"); d.textContent=s; return 
 function fmtDate(ts){ return new Date(ts).toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric",year:"numeric"}); }
 /* ── card images: looks for ./cards/<slug>.jpg (then .png) next to this file; falls back to text design ── */
 function slug(name){ return name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,""); }
-function cardImgHTML(i, cls, withCaption){
+function cardImgHTML(i, cls){
   const s = slug(cardName(i));
   return `<img class="${cls}" src="cards/${s}.jpg" alt="${esc(cardName(i))}" loading="lazy"
-    onerror="if(!this.dataset.p){this.dataset.p=1;this.src='cards/${s}.png';}else{if(this.nextElementSibling&&this.nextElementSibling.classList.contains('imgcap'))this.nextElementSibling.remove();this.remove();}">` +
-    (withCaption?`<div class="imgcap">${esc(cardName(i))}</div>`:"");
+    onerror="if(!this.dataset.p){this.dataset.p=1;this.src='cards/${s}.png';}else{this.remove();}">`;
 }
 
 /* ═══════════════════ NAV ═══════════════════ */
@@ -535,21 +588,44 @@ function renderSanctuary(){
   list.innerHTML = j.slice(-3).reverse().map(e=>journalCardHTML(e)).join("");
   list.querySelectorAll(".journal-entry").forEach(el=>el.addEventListener("click",()=>{showView("journal"); openDetail(el.dataset.id);}));
 }
+let dailyDraw = null;
 $("btn-daily").addEventListener("click",()=>{
-  const d = shuffleDraw(1,true)[0];
+  dailyDraw = shuffleDraw(1,true)[0];
+  const d = dailyDraw;
   const c = DECK[d.card];
   const kw = d.reversed ? c[4] : c[2];
   const meaning = d.reversed ? c[5] : c[3];
   $("daily-result").classList.remove("hidden");
   $("daily-result").innerHTML = `
     <div class="interp-card ${d.reversed?"rev":""}">
-      ${cardImgHTML(d.card,"daily-img"+(d.reversed?" reversed":""),false)}
+      ${cardImgHTML(d.card,"daily-img"+(d.reversed?" reversed":""))}
       <div class="pos-label">Daily card</div>
-      <div class="cname">${esc(c[0])}${d.reversed?" · reversed":""}</div>
+      <button class="cname-link" data-ci="${d.card}">${esc(c[0])}${d.reversed?" · reversed":""}</button>
       <div class="kw">${esc(kw)}</div>
       <div class="meaning">${esc(meaning)}</div>
-      <div class="poscontext">Carry it lightly — one lens for the day, not a forecast.</div>
-    </div>`;
+      ${d.card<22?`<div class="meaning" style="margin-top:6px"><strong>In the image:</strong> ${esc(MAJOR_STUDY[d.card][1])}</div>`:""}
+      <div class="poscontext">Carry it lightly — one lens for the day, not a forecast. Tap the card to see it large.</div>
+    </div>
+    <label for="daily-reflection">A quick reflection (optional)</label>
+    <textarea id="daily-reflection" placeholder="Where might this show up today?"></textarea>
+    <div class="btn-row"><button class="ghost" id="btn-daily-save">Save to journal</button></div>`;
+  wireStudyLinks($("daily-result"));
+  $("btn-daily-save").addEventListener("click",()=>{
+    const dc = DECK[dailyDraw.card];
+    const entries = loadJournal();
+    entries.push({
+      id: Date.now().toString(36), ts: Date.now(),
+      intention: "Daily card", mood: null, tags: ["daily"],
+      spread: "Daily Card", deck: "rws-1909", mode: "digital",
+      cards: [{position:"Daily", card:dc[0], suit:dc[1], reversed:dailyDraw.reversed, kw:(dailyDraw.reversed?dc[4]:dc[2])}],
+      synthesis: ["A single card is a single lens. Sit with where it lands before deciding what it means."],
+      reflection: $("daily-reflection").value.trim(), laterReflection: ""
+    });
+    saveJournal(entries);
+    $("btn-daily-save").textContent = "Saved ✶";
+    $("btn-daily-save").disabled = true;
+    renderSanctuary();
+  });
 });
 $("btn-new-reading").addEventListener("click",()=>showView("reading"));
 
@@ -563,7 +639,7 @@ $("mood-chips").addEventListener("click",e=>{
 $("spread-grid").innerHTML = SPREADS.map(s=>`
   <button class="spread-card" data-id="${s.id}">
     <div class="n">${s.name}</div>
-    <div class="c">${s.positions.length} card${s.positions.length===1?"":"s"}</div>
+    <div class="c">${s.positions.length} card${s.positions.length===1?"":"s"} — ${s.d}</div>
   </button>`).join("");
 $("spread-grid").addEventListener("click",e=>{
   const b = e.target.closest(".spread-card"); if(!b) return;
@@ -573,7 +649,27 @@ $("spread-grid").addEventListener("click",e=>{
 document.querySelectorAll(".mode-btn").forEach(b=>b.addEventListener("click",()=>{
   document.querySelectorAll(".mode-btn").forEach(m=>m.classList.remove("on"));
   b.classList.add("on"); state.mode = b.dataset.mode;
+  $("shuffle-area").classList.toggle("hidden", state.mode==="physical");
+  $("btn-shuffle").classList.toggle("hidden", state.mode==="physical");
 }));
+$("reveal-chips").addEventListener("click",e=>{
+  const b = e.target.closest(".chip"); if(!b) return;
+  document.querySelectorAll("#reveal-chips .chip").forEach(c=>c.classList.remove("on"));
+  b.classList.add("on"); state.revealMode = b.dataset.reveal;
+});
+
+/* ═══════════════════ SHUFFLE ═══════════════════ */
+let deckOrder = null, shuffleCount = 0;
+function riffle(){
+  deckOrder = [...DECK.keys()];
+  for(let i=deckOrder.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [deckOrder[i],deckOrder[j]]=[deckOrder[j],deckOrder[i]]; }
+}
+$("btn-shuffle").addEventListener("click",()=>{
+  riffle(); shuffleCount++;
+  const st = $("shuffle-stack");
+  st.classList.remove("riffle"); void st.offsetWidth; st.classList.add("riffle");
+  $("shuffle-count").textContent = `Shuffled ×${shuffleCount} — deal when it feels right.`;
+});
 
 /* ═══════════════════ DEAL ═══════════════════ */
 $("btn-deal").addEventListener("click",()=>{
@@ -585,26 +681,33 @@ $("btn-deal").addEventListener("click",()=>{
   $("step-interp").classList.add("hidden");
   $("table-title").textContent = state.spread.name;
   const pos = $("positions");
+  $("live-meanings").innerHTML = "";
   if(state.mode==="digital"){
-    state.drawn = shuffleDraw(n, allowRev);
+    if(!deckOrder) riffle();
+    state.drawn = deckOrder.slice(0,n).map(c=>({card:c, reversed: allowRev && Math.random()<0.5}));
+    deckOrder = null; shuffleCount = 0;
+    $("shuffle-count").textContent = "The deck is already random — shuffle only if it's part of your ritual.";
     pos.innerHTML = state.spread.positions.map((p,i)=>`
-      <div class="pos">
+      <div class="pos" data-p="${i}">
         <div class="pname">${esc(p[0])}</div>
         <div class="card-slot" data-i="${i}" role="button" tabindex="0" aria-label="Reveal ${esc(p[0])} card">
           <div class="card-inner">
             <div class="card-face card-back">✶</div>
             <div class="card-face card-front ${state.drawn[i].reversed?"reversed":""}">
-              ${cardImgHTML(state.drawn[i].card,"card-img",true)}
+              ${cardImgHTML(state.drawn[i].card,"card-img")}
               <div class="cn">${esc(cardName(state.drawn[i].card))}</div>
               ${state.drawn[i].reversed?'<div class="rev">Reversed</div>':""}
             </div>
           </div>
         </div>
+        <div class="cardname">${esc(cardName(state.drawn[i].card))}${state.drawn[i].reversed?' <span class="revtag">· reversed</span>':""}</div>
       </div>`).join("");
     $("btn-interpret").classList.add("hidden");
     pos.querySelectorAll(".card-slot").forEach(slot=>{
       const reveal=()=>{ if(slot.classList.contains("flipped"))return;
-        slot.classList.add("flipped"); state.revealedCount++;
+        slot.classList.add("flipped"); slot.closest(".pos").classList.add("revealed");
+        state.revealedCount++;
+        if(state.revealMode==="live") showLiveMeaning(+slot.dataset.i);
         if(state.revealedCount===n) $("btn-interpret").classList.remove("hidden"); };
       slot.addEventListener("click",reveal);
       slot.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();reveal();} });
@@ -622,11 +725,15 @@ $("btn-deal").addEventListener("click",()=>{
       </div>`).join("");
     $("btn-interpret").classList.add("hidden");
     pos.querySelectorAll("select").forEach(s=>s.addEventListener("change",()=>{
-      state.drawn[+s.dataset.i].card = s.value===""?null:+s.value;
+      const i = +s.dataset.i;
+      state.drawn[i].card = s.value===""?null:+s.value;
+      if(state.revealMode==="live" && state.drawn[i].card!==null) showLiveMeaning(i);
       if(state.drawn.every(d=>d.card!==null)) $("btn-interpret").classList.remove("hidden");
     }));
     pos.querySelectorAll("input[data-rev]").forEach(c=>c.addEventListener("change",()=>{
-      state.drawn[+c.dataset.rev].reversed = c.checked;
+      const i = +c.dataset.rev;
+      state.drawn[i].reversed = c.checked;
+      if(state.revealMode==="live" && state.drawn[i].card!==null) showLiveMeaning(i);
     }));
   }
   $("step-table").scrollIntoView({behavior:"smooth"});
@@ -638,19 +745,35 @@ function buildCardOptions(){
 }
 
 /* ═══════════════════ INTERPRET ═══════════════════ */
-$("btn-interpret").addEventListener("click",()=>{
-  $("step-interp").classList.remove("hidden");
-  $("interp-cards").innerHTML = state.drawn.map((d,i)=>{
-    const c = DECK[d.card]; const p = state.spread.positions[i];
-    const kw = d.reversed?c[4]:c[2]; const m = d.reversed?c[5]:c[3];
-    return `<div class="interp-card ${d.reversed?"rev":""}">
-      <div class="pos-label">${esc(p[0])}</div>
-      <div class="cname">${esc(c[0])}${d.reversed?" · reversed":""}</div>
+function interpCardHTML(d, posName, posDesc){
+  const c = DECK[d.card];
+  const kw = d.reversed?c[4]:c[2]; const m = d.reversed?c[5]:c[3];
+  return `<div class="interp-card ${d.reversed?"rev":""}">
+      <div class="pos-label">${esc(posName)}</div>
+      <button class="cname-link" data-ci="${d.card}">${esc(c[0])}${d.reversed?" · reversed":""}</button>
       <div class="kw">${esc(kw)}</div>
       <div class="meaning">${esc(m)}</div>
-      <div class="poscontext">In this position — ${esc(p[1].toLowerCase())} Consider how this card's energy answers that.</div>
+      ${posDesc?`<div class="poscontext">In this position — ${esc(posDesc.toLowerCase())} Consider how this card's energy answers that.</div>`:""}
     </div>`;
-  }).join("");
+}
+function wireStudyLinks(container){
+  container.querySelectorAll(".cname-link").forEach(b=>b.addEventListener("click",()=>{
+    showView("study"); openStudy(+b.dataset.ci);
+  }));
+}
+function showLiveMeaning(i){
+  const p = state.spread.positions[i];
+  let holder = document.querySelector(`#live-meanings [data-lm="${i}"]`);
+  if(!holder){ holder = document.createElement("div"); holder.dataset.lm = i; $("live-meanings").appendChild(holder); }
+  holder.innerHTML = interpCardHTML(state.drawn[i], p[0], p[1]);
+  wireStudyLinks(holder);
+}
+$("btn-interpret").addEventListener("click",()=>{
+  $("step-interp").classList.remove("hidden");
+  /* if meanings were revealed live they're already on screen — show only the synthesis */
+  $("interp-cards").innerHTML = state.revealMode==="live" ? "" :
+    state.drawn.map((d,i)=>interpCardHTML(d, state.spread.positions[i][0], state.spread.positions[i][1])).join("");
+  wireStudyLinks($("interp-cards"));
   $("interp-synth").innerHTML = `<h3>The larger story</h3>` + synthesize(state.drawn).map(s=>`<p>${esc(s)}</p>`).join("");
   $("step-interp").scrollIntoView({behavior:"smooth"});
 });
@@ -686,7 +809,7 @@ $("btn-save-reading").addEventListener("click",()=>{
     spread: state.spread.name,
     deck: "rws-1909",
     mode: state.mode,
-    cards: state.drawn.map((d,i)=>({position:state.spread.positions[i][0], card:cardName(d.card), suit:DECK[d.card][1], reversed:d.reversed})),
+    cards: state.drawn.map((d,i)=>({position:state.spread.positions[i][0], card:cardName(d.card), suit:DECK[d.card][1], reversed:d.reversed, kw:(d.reversed?DECK[d.card][4]:DECK[d.card][2])})),
     synthesis: synthesize(state.drawn),
     reflection: $("reflection").value.trim(),
     laterReflection: ""
@@ -701,14 +824,21 @@ function resetReading(){
   document.querySelectorAll("#mood-chips .chip").forEach(c=>c.classList.remove("on"));
   document.querySelectorAll(".spread-card").forEach(c=>c.classList.remove("on"));
   $("step-table").classList.add("hidden"); $("step-interp").classList.add("hidden");
-  state = { spread:null, mode:state.mode, drawn:[], mood:null, revealedCount:0 };
+  $("live-meanings").innerHTML = "";
+  state = { spread:null, mode:state.mode, drawn:[], mood:null, revealedCount:0, revealMode:state.revealMode };
 }
 
 /* ═══════════════════ JOURNAL ═══════════════════ */
+function deckIndexByName(name){ return DECK.findIndex(c=>c[0]===name); }
 function journalCardHTML(e){
+  const thumbs = e.cards.map(c=>{
+    const i = deckIndexByName(c.card);
+    return i<0 ? "" : cardImgHTML(i, "thumb"+(c.reversed?" reversed":""));
+  }).join("");
   return `<div class="journal-entry" data-id="${e.id}">
     <div class="d">${fmtDate(e.ts)} · ${esc(e.spread)}</div>
     <div class="q">${esc(e.intention||"(no intention recorded)")}</div>
+    ${thumbs?`<div class="thumbrow">${thumbs}</div>`:""}
     <div class="meta">${e.cards.map(c=>esc(c.card)+(c.reversed?" (r)":"")).join(" · ")}</div>
     ${e.tags.map(t=>`<span class="tagpill">${esc(t)}</span>`).join("")}
   </div>`;
@@ -734,7 +864,11 @@ function openDetail(id){
   d.innerHTML = `
     <div class="eyebrow">${fmtDate(e.ts)} · ${esc(e.spread)}${e.mood?" · feeling "+esc(e.mood):""}</div>
     <h2>${esc(e.intention||"(no intention recorded)")}</h2>
-    <ul class="detail-cards">${e.cards.map(c=>`<li><strong>${esc(c.position)}:</strong> ${esc(c.card)}${c.reversed?" · reversed":""}</li>`).join("")}</ul>
+    <ul class="detail-cards">${e.cards.map(c=>{
+      const ci = deckIndexByName(c.card);
+      const kw = c.kw || (ci>=0 ? (c.reversed?DECK[ci][4]:DECK[ci][2]) : "");
+      return `<li><strong>${esc(c.position)}:</strong> ${ci>=0?`<button class="cname-link" style="font-size:.92rem" data-ci="${ci}">${esc(c.card)}${c.reversed?" · reversed":""}</button>`:esc(c.card)}${kw?` — <em>${esc(kw)}</em>`:""}</li>`;
+    }).join("")}</ul>
     ${e.synthesis?`<div class="synth"><h3>The larger story</h3>${e.synthesis.map(s=>`<p>${esc(s)}</p>`).join("")}</div>`:""}
     ${e.reflection?`<label>First reflection</label><p>${esc(e.reflection)}</p>`:""}
     <label for="later-reflection">Later reflection — what actually happened? What held up?</label>
@@ -743,6 +877,7 @@ function openDetail(id){
       <button class="primary" id="btn-save-later">Save reflection</button>
       <button class="ghost" id="btn-delete-entry">Delete reading</button>
     </div>`;
+  wireStudyLinks(d);
   $("btn-save-later").addEventListener("click",()=>{
     const entries = loadJournal();
     const target = entries.find(x=>x.id===id);
@@ -769,7 +904,18 @@ $("import-file").addEventListener("change",e=>{
   r.onload = ()=>{ try{
       const data = JSON.parse(r.result);
       if(!Array.isArray(data)) throw 0;
-      saveJournal(data); renderJournal(); renderSanctuary();
+      const existing = loadJournal();
+      const byId = new Map(existing.map(x=>[x.id,x]));
+      let added = 0, enriched = 0;
+      data.forEach(entry=>{
+        if(!entry || !entry.id) return;
+        const cur = byId.get(entry.id);
+        if(!cur){ byId.set(entry.id, entry); added++; }
+        else if(entry.laterReflection && !cur.laterReflection){ byId.set(entry.id, entry); enriched++; }
+      });
+      const merged = [...byId.values()].sort((a,b)=>a.ts-b.ts);
+      saveJournal(merged); renderJournal(); renderSanctuary();
+      alert(`Merged: ${added} new reading${added===1?"":"s"} added${enriched?`, ${enriched} updated with reflections`:""}. Nothing was overwritten.`);
     }catch(err){ alert("That file isn't a Tarot Atlas journal export."); } };
   r.readAsText(f);
 });
@@ -925,6 +1071,42 @@ function openStudy(i){
   d.querySelectorAll(".study-appearance").forEach(el=>el.addEventListener("click",()=>{ showView("journal"); openDetail(el.dataset.id); }));
   d.scrollIntoView({behavior:"smooth"});
 }
+
+$("btn-patterns-guide").addEventListener("click",()=>{
+  const d = $("study-detail"); d.classList.remove("hidden");
+  d.innerHTML = `
+    <div class="eyebrow">Study · Reading patterns</div>
+    <h2>Reading the table, not just the cards</h2>
+    <p class="lede">The same logic the Atlas uses in "The larger story" — how a spread's overall composition carries meaning before any single card is read.</p>
+    <div class="study-section"><h3>Major Arcana weight</h3><p>Minor cards describe day-to-day currents; Majors describe chapters. When half or more of a spread is Major Arcana, the reading is usually pointing past logistics toward a larger arc — a lesson, a threshold, a story that has been building for a while. An all-Major spread is rare and worth sitting with.</p></div>
+    <div class="study-section"><h3>Suit dominance</h3><p>When one suit claims half the table, its element sets the register of the whole reading. Wands: ${esc(SUIT_THEME.wands)}. Cups: ${esc(SUIT_THEME.cups)}. Swords: ${esc(SUIT_THEME.swords)}. Pentacles: ${esc(SUIT_THEME.pentacles)}. A Swords-heavy spread about a relationship, for instance, suggests the real terrain is communication and truth-telling, not feeling.</p></div>
+    <div class="study-section"><h3>Missing suits</h3><p>In larger spreads, absence speaks. No Cups in a question about family? No Pentacles in a question about a purchase? Sometimes what refuses to appear is the dimension being avoided — and sometimes it's simply the dimension that's already settled. Asking which is the useful move.</p></div>
+    <div class="study-section"><h3>Reversals in bulk</h3><p>One reversal modifies one card. But when half or more of a spread falls reversed, read it as a condition of the whole reading: energy internalized, blocked, delayed, or still forming beneath the surface rather than expressed in the open. Heavy-reversal spreads often accompany situations where you're waiting on something — or someone — outside your control.</p></div>
+    <div class="study-section"><h3>Court clusters</h3><p>Two or more court cards usually means specific people matter here — or specific roles you're being asked to play. Pages learn, Knights pursue, Queens embody, Kings direct. Ask who in the situation is holding each role, including you.</p></div>
+    <div class="study-section"><h3>Repeating numbers</h3><p>Two or three cards of the same number amplify that number's theme across elements — three Fives is disruption arriving on multiple fronts at once; two Tens is more than one cycle closing together. See any Minor card's study page for the number meanings.</p></div>
+    <div class="btn-row"><button class="ghost" id="btn-study-back2">← All cards</button></div>`;
+  $("btn-study-back2").addEventListener("click",()=>{ d.classList.add("hidden"); $("study-browse").scrollIntoView(); });
+  d.scrollIntoView({behavior:"smooth"});
+});
+
+/* ── lightbox: click any card image to enlarge ── */
+document.addEventListener("click",e=>{
+  const img = e.target.closest("img.card-img, img.daily-img, img.study-img, img.thumb");
+  if(!img) return;
+  /* table cards: only enlarge once revealed */
+  const slot = img.closest(".card-slot");
+  if(slot && !slot.classList.contains("flipped")) return;
+  const reversed = img.classList.contains("reversed") || !!img.closest(".card-front.reversed");
+  const lb = document.createElement("div");
+  lb.className = "lightbox";
+  lb.innerHTML = `<img src="${img.src}" alt="${img.alt}" class="${reversed?"reversed":""}">
+    <div class="lbname">${img.alt}${reversed?" · reversed":""}</div>`;
+  const close = ()=>{ lb.remove(); document.removeEventListener("keydown",onKey); };
+  const onKey = ev=>{ if(ev.key==="Escape") close(); };
+  lb.addEventListener("click",close);
+  document.addEventListener("keydown",onKey);
+  document.body.appendChild(lb);
+});
 
 /* init */
 renderSanctuary();
