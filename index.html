@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tarot Atlas</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tarot Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
@@ -33,6 +36,15 @@ body{
   min-height:100vh;
 }
 h1,h2,h3,.serif{font-family:'Fraunces',serif;font-weight:600;color:var(--navy)}
+.a2hs-banner{
+  background:var(--gold-soft);border-bottom:1px solid var(--gold);
+  padding:10px 20px;font-size:.84rem;color:var(--navy);text-align:center;
+}
+.a2hs-banner b{color:var(--terracotta)}
+.a2hs-banner button{
+  background:none;border:none;color:var(--navy);text-decoration:underline;
+  cursor:pointer;font:inherit;padding:0 0 0 6px;
+}
 header{
   background:var(--navy);
   color:var(--cream);
@@ -240,6 +252,8 @@ footer{max-width:960px;margin:0 auto;padding:0 20px 30px;font-size:.74rem;color:
 </style>
 </head>
 <body>
+
+<div class="a2hs-banner hidden" id="a2hs-banner"></div>
 
 <header>
   <div class="wordmark">
@@ -1121,6 +1135,23 @@ document.addEventListener("click",e=>{
   document.addEventListener("keydown",onKey);
   document.body.appendChild(lb);
 });
+
+/* ── iPad/iPhone Safari home-screen nudge (avoids the 7-day storage purge) ── */
+(function(){
+  const isIOS = /iP(ad|hone|od)/.test(navigator.userAgent) || (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1);
+  const isStandalone = window.navigator.standalone === true || window.matchMedia("(display-mode: standalone)").matches;
+  if(!isIOS || isStandalone) return;
+  let dismissed = 0;
+  try{ dismissed = +localStorage.getItem("tarotAtlasA2HSDismissed")||0; }catch(e){}
+  if(dismissed && Date.now()-dismissed < 14*86400000) return;
+  const b = $("a2hs-banner");
+  b.classList.remove("hidden");
+  b.innerHTML = `<b>On an iPhone or iPad?</b> Safari can erase this journal after a week of inactivity. Tap the Share button, then <b>Add to Home Screen</b> — launching from that icon keeps it safe. <button id="a2hs-dismiss">Got it</button>`;
+  document.getElementById("a2hs-dismiss").addEventListener("click",()=>{
+    b.classList.add("hidden");
+    try{ localStorage.setItem("tarotAtlasA2HSDismissed", String(Date.now())); }catch(e){}
+  });
+})();
 
 /* init */
 renderSanctuary();
